@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Framed-Ink-Analyse · Autobahnbrücke / Zwei Wächter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Palette destilliert aus dem analysierten Render */
+  --void:#0c1214;          /* tiefster Schatten / Straße */
+  --char:#141d20;          /* charcoal-teal Grundfläche */
+  --char2:#1b272b;         /* Panel-Fläche */
+  --concrete:#3a4548;      /* Brückenbeton */
+  --steel:#586870;         /* Stahl/Himmel kühl */
+  --terra:#b5603e;         /* Terrakotta-Vogel */
+  --terra-dim:#7d4630;
+  --moss:#41743f;          /* Giftgrün-Figur */
+  --moss-lo:#26442a;
+  --smog:#caa15c;          /* Smog-Sonnenuntergang */
+  --smog-hi:#e6c98a;
+  --hazard:#d8a13a;        /* Hazard-Gelb Akzent */
+  --ink:#e8e2d6;           /* Text hell */
+  --ink-dim:#9aa6a4;       /* Text gedämpft */
+  --line:#2c393d;
+  /* Schweregrade */
+  --crit:#d94f3d;          /* Kritisch */
+  --warn:#d8a13a;          /* Wichtig */
+  --hold:#4fae8b;          /* Halten */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--void);
+  color:var(--ink);
+  font-family:'Archivo Narrow',sans-serif;
+  font-size:17px;line-height:1.62;
+  letter-spacing:.01em;
+  background-image:
+    radial-gradient(120% 80% at 78% 38%, rgba(202,161,92,.10), transparent 55%),
+    radial-gradient(90% 70% at 12% 8%, rgba(88,104,112,.10), transparent 60%),
+    linear-gradient(180deg,#0e1518 0%, #0a0f11 100%);
+  background-attachment:fixed;
+}
+/* feines Grain-Overlay */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+h1,h2,h3,h4{font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.02em;line-height:1.1}
+.display{font-family:'Oswald',sans-serif;text-transform:uppercase}
+.serif{font-family:'Spectral',serif}
+a{color:var(--smog-hi);text-decoration:none}
+
+/* ===== Layout ===== */
+.wrap{max-width:1080px;margin:0 auto;padding:0 26px}
+.layout{display:grid;grid-template-columns:210px 1fr;gap:0;max-width:1320px;margin:0 auto}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+
+/* ===== Sticky Nav ===== */
+nav.side{
+  position:sticky;top:0;align-self:start;height:100vh;
+  padding:30px 18px;border-right:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(20,29,32,.6),rgba(10,15,17,.6));
+  backdrop-filter:blur(4px);
+}
+@media(max-width:900px){nav.side{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)}}
+nav.side .brand{font-family:'Oswald';text-transform:uppercase;font-weight:700;font-size:13px;letter-spacing:.18em;color:var(--smog);margin-bottom:4px}
+nav.side .sub{font-size:11px;color:var(--ink-dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:26px}
+nav.side a.nl{display:block;font-family:'Oswald';font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim);padding:7px 0;border-bottom:1px dashed transparent;transition:.2s}
+nav.side a.nl:hover{color:var(--ink);padding-left:6px}
+nav.side a.nl .num{display:inline-block;width:22px;color:var(--terra);font-weight:600}
+nav.side .nl.dr .num{color:var(--hazard)}
+
+main{padding:0 0 90px;min-width:0}
+
+/* ===== Hero ===== */
+header.hero{padding:54px 26px 30px;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+header.hero::before{content:"";position:absolute;right:-10%;top:-30%;width:60%;height:160%;
+  background:radial-gradient(circle,rgba(202,161,92,.16),transparent 60%);pointer-events:none}
+.kicker{font-family:'Oswald';text-transform:uppercase;letter-spacing:.32em;font-size:12px;color:var(--hazard);margin-bottom:14px}
+header.hero h1{font-size:clamp(34px,5.4vw,60px);font-weight:700;text-transform:uppercase;line-height:.98;color:var(--ink)}
+header.hero h1 .accent{color:var(--terra)}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:18px;font-family:'Oswald';font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim)}
+.meta-row span b{color:var(--steel);font-weight:500}
+
+.statement{margin-top:26px;max-width:760px}
+.statement .lbl{font-family:'Oswald';font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--smog);margin-bottom:6px}
+.statement .big{font-family:'Spectral',serif;font-style:italic;font-size:clamp(20px,2.6vw,26px);line-height:1.4;color:var(--ink)}
+
+.identity-box{margin-top:26px;max-width:820px;border:1px solid var(--line);border-left:3px solid var(--hold);
+  background:linear-gradient(135deg,rgba(27,39,43,.7),rgba(20,29,32,.4));padding:18px 20px;border-radius:3px}
+.identity-box .tag{display:inline-block;font-family:'Oswald';font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:#0c1214;background:var(--hold);padding:3px 9px;border-radius:2px;margin-bottom:10px;font-weight:600}
+.identity-box p{font-size:15.5px;color:#cfd6d3}
+
+.verdict{margin-top:28px;max-width:860px;background:rgba(12,18,20,.6);border:1px solid var(--line);border-radius:4px;padding:22px 22px 8px}
+.verdict .vh{font-family:'Oswald';text-transform:uppercase;letter-spacing:.14em;font-size:13px;color:var(--hazard);margin-bottom:10px}
+.verdict .vt{font-size:16.5px;color:var(--ink);margin-bottom:16px}
+.levers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+@media(max-width:700px){.levers{grid-template-columns:1fr}}
+.lever{border:1px solid var(--line);border-top:3px solid var(--crit);border-radius:3px;padding:13px 14px;background:rgba(20,29,32,.5)}
+.lever:nth-child(2){border-top-color:var(--warn)}
+.lever:nth-child(3){border-top-color:var(--warn)}
+.lever .ln{font-family:'Oswald';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:5px}
+.lever .lx{font-size:14.5px;line-height:1.42;color:var(--ink)}
+
+/* Ampel-Leiste */
+.scores{margin-top:30px;max-width:880px}
+.scores h3{font-family:'Oswald';font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--smog);margin-bottom:14px}
+.score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:760px){.score-grid{grid-template-columns:repeat(2,1fr)}}
+.score{border:1px solid var(--line);border-radius:3px;padding:11px 12px;background:rgba(20,29,32,.5)}
+.score .sn{font-family:'Oswald';font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.score .dots{display:flex;gap:4px}
+.score .dot{width:13px;height:6px;border-radius:1px;background:var(--line)}
+.score .dot.on.c{background:var(--crit)}
+.score .dot.on.w{background:var(--warn)}
+.score .dot.on.h{background:var(--hold)}
+.score .pill{font-family:'Oswald';font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:2px;font-weight:600}
+.pill.c{background:var(--crit);color:#180a08}
+.pill.w{background:var(--warn);color:#1a1304}
+.pill.h{background:var(--hold);color:#04140e}
+
+/* ===== Interaktives Bild ===== */
+section.imgsec{padding:46px 26px 30px}
+.sec-h{display:flex;align-items:baseline;gap:16px;margin-bottom:6px}
+.sec-h .sn{font-family:'Oswald';font-size:13px;color:var(--terra);letter-spacing:.2em;font-weight:600}
+.sec-h h2{font-size:clamp(24px,3.2vw,34px);text-transform:uppercase;color:var(--ink)}
+.sec-sub{color:var(--ink-dim);max-width:720px;margin-bottom:22px;font-size:15.5px}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;align-items:center}
+.toolbar .grp{display:flex;gap:6px;flex-wrap:wrap}
+.tg{font-family:'Oswald';font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);
+  border:1px solid var(--line);background:rgba(20,29,32,.6);padding:7px 12px;border-radius:3px;cursor:pointer;transition:.15s;user-select:none}
+.tg:hover{border-color:var(--steel);color:var(--ink)}
+.tg.active{background:var(--terra);color:#150a06;border-color:var(--terra);font-weight:600}
+.tg.run.active{background:var(--hazard);color:#1a1304}
+.toolbar .lab{font-family:'Oswald';font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--steel);margin-right:4px}
+
+.stage{position:relative;width:100%;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#000;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.stage img.base{display:block;width:100%;height:auto}
+.stage svg.ov{position:absolute;inset:0;width:100%;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;font-family:'Oswald';font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim)}
+.legend i{display:inline-block;width:16px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.legend .c i{background:var(--crit)}
+.legend .w i{background:var(--warn)}
+.legend .h i{background:var(--hold)}
+.legend .e i{background:none;border:2px solid var(--smog-hi);height:7px}
+.hint{font-size:13px;color:var(--steel);margin-top:10px;font-style:italic;font-family:'Spectral',serif}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="side">
+  <div class="brand">Framed·Ink</div>
+  <div class="sub">Analyse-Linse</div>
+  <a class="nl" href="#top"><span class="num">00</span>Verdict</a>
+  <a class="nl" href="#bild"><span class="num">▣</span>Das Bild</a>
+  <a class="nl dr" href="#d1"><span class="num">01</span>Lesbarkeit</a>
+  <a class="nl dr" href="#d2"><span class="num">02</span>Blickführung</a>
+  <a class="nl dr" href="#d3"><span class="num">03</span>Frame-Energie</a>
+  <a class="nl dr" href="#d4"><span class="num">04</span>Silhouette</a>
+  <a class="nl dr" href="#d5"><span class="num">05</span>Synthese</a>
+  <a class="nl" href="#notan"><span class="num">◧</span>Notan-Vergleich</a>
+  <a class="nl" href="#inspo"><span class="num">✦</span>Inspiration</a>
+  <a class="nl" href="#plan"><span class="num">☑</span>Maßnahmen</a>
+  <a class="nl" href="#quellen"><span class="num">§</span>Quellen</a>
+</nav>
+<main id="top">
+
+<header class="hero">
+  <div class="kicker">Art-Director-Analyse · Visual Storytelling</div>
+  <h1>Autobahnbrücke —<br><span class="accent">Zwei Wächter</span> im Gegenlicht</h1>
+  <div class="meta-row">
+    <span><b>Format</b> 775 × 452 px</span>
+    <span><b>Ratio</b> ≈ 1.71 : 1</span>
+    <span><b>Medium</b> 3D-Render (untexturierte Clay/Mat-Pass)</span>
+    <span><b>Datum</b> 06.06.2026</span>
+  </div>
+
+  <div class="statement">
+    <div class="lbl">Aussage / Emotion — der Framed-Ink-Einstieg</div>
+    <div class="big">„Zwei seltsame Kreaturen stehen unter einer Betonbrücke in einer abgeschiedenen, dämmrigen Niemandszone — ein stiller, leicht unheimlicher Moment am Rand der Zivilisation."</div>
+  </div>
+
+  <div class="identity-box">
+    <div class="tag">Identität · geschützt</div>
+    <p><b>Tonart:</b> melancholisch-isolierte Dämmerung, latent unheimlich, nicht aggressiv. <b>Palette &amp; Look:</b> kühler Stahl-Himmel gegen warmen Smog-Sonnenuntergang, Terrakotta- und Giftgrün-Körper als einzige Farbinseln — ein bewusst rauer, untexturierter Clay-Render. <b>Thema:</b> bizarre Wesen in banaler Infrastruktur (Brücke, Asphalt, Leitplanke) — das Unheimliche im Alltäglichen. <b>Handschrift:</b> weiche organische Volumen vs. harte technische Geometrie. Diese Seele bleibt in jedem Eingriff unangetastet.</p>
+  </div>
+
+  <div class="verdict">
+    <div class="vh">Verdict</div>
+    <div class="vt">Eine atmosphärisch starke, stimmungsvolle Anlage mit echtem erzählerischem Kern — aber der <b>Moment ist noch nicht inszeniert</b>: Die beiden Figuren konkurrieren statt zu kooperieren, die zweite Figur verschmilzt mit dem Hintergrund, und der stärkste Kontrast (der Sonnenuntergang) liegt rechts <em>neben</em> dem Geschehen statt es zu tragen. Das Notan trägt nur halb.</div>
+    <div class="levers">
+      <div class="lever"><div class="ln">Hebel 1 · Kritisch</div><div class="lx">Fokus klären: <em>eine</em> Hauptfigur bestimmen und den hellsten Wert (Sonnenuntergang) hinter sie ziehen.</div></div>
+      <div class="lever"><div class="ln">Hebel 2 · Wichtig</div><div class="lx">Grüne Figur vom dunklen Brückenschatten trennen — Silhouette geht aktuell verloren.</div></div>
+      <div class="lever"><div class="ln">Hebel 3 · Wichtig</div><div class="lx">Leere untere Bildhälfte beschneiden / aktivieren — die Straße frisst 45 % ohne Funktion.</div></div>
+    </div>
+  </div>
+
+  <div class="scores">
+    <h3>Selbstverortung über die Kern-Achsen</h3>
+    <div class="score-grid">
+      <div class="score"><div class="sn">Clarity <span class="pill w">Mittel</span></div><div class="dots"><span class="dot on w"></span><span class="dot on w"></span><span class="dot on w"></span><span class="dot"></span><span class="dot"></span></div></div>
+      <div class="score"><div class="sn">Eye-Lead <span class="pill c">Schwach</span></div><div class="dots"><span class="dot on c"></span><span class="dot on c"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+      <div class="score"><div class="sn">Notan / Kontrast <span class="pill w">Mittel</span></div><div class="dots"><span class="dot on w"></span><span class="dot on w"></span><span class="dot on w"></span><span class="dot"></span><span class="dot"></span></div></div>
+      <div class="score"><div class="sn">Frame-Energie <span class="pill c">Schwach</span></div><div class="dots"><span class="dot on c"></span><span class="dot on c"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+      <div class="score"><div class="sn">Silhouette <span class="pill c">Schwach</span></div><div class="dots"><span class="dot on c"></span><span class="dot on c"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+      <div class="score"><div class="sn">Tiefe <span class="pill h">Gut</span></div><div class="dots"><span class="dot on h"></span><span class="dot on h"></span><span class="dot on h"></span><span class="dot on h"></span><span class="dot"></span></div></div>
+      <div class="score"><div class="sn">Kamera <span class="pill w">Mittel</span></div><div class="dots"><span class="dot on w"></span><span class="dot on w"></span><span class="dot on w"></span><span class="dot"></span><span class="dot"></span></div></div>
+      <div class="score"><div class="sn">Aufteilung <span class="pill c">Schwach</span></div><div class="dots"><span class="dot on c"></span><span class="dot on c"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ INTERAKTIVES BILD ============ -->
+<section class="imgsec" id="bild">
+  <div class="sec-h"><span class="sn">▣</span><h2>Das analysierte Werk</h2></div>
+  <p class="sec-sub">Overlays ein-/ausblendbar. Der <b>Durchlauf-Umschalter</b> aktiviert automatisch die jeweils passende Ebene; einzelne Layer lassen sich darunter frei kombinieren. Farbcode: <span style="color:var(--crit)">Kritisch</span> · <span style="color:var(--warn)">Wichtig</span> · <span style="color:var(--hold)">Halten</span>.</p>
+
+  <div class="toolbar">
+    <span class="lab">Durchlauf</span>
+    <div class="grp" id="runbtns">
+      <span class="tg run" data-run="0">Aus</span>
+      <span class="tg run" data-run="1">D1</span>
+      <span class="tg run" data-run="2">D2</span>
+      <span class="tg run" data-run="3">D3</span>
+      <span class="tg run" data-run="4">D4</span>
+      <span class="tg run" data-run="5">D5</span>
+    </div>
+  </div>
+  <div class="toolbar">
+    <span class="lab">Layer</span>
+    <div class="grp" id="layerbtns">
+      <span class="tg" data-layer="anno">Annotationen</span>
+      <span class="tg" data-layer="eye">Eye-Lead</span>
+      <span class="tg" data-layer="tension">Tension-Lines</span>
+      <span class="tg" data-layer="game">Game-Field</span>
+      <span class="tg" data-layer="grid">Drittel-Raster</span>
+      <span class="tg" data-layer="sil">Silhouette</span>
+    </div>
+  </div>
+
+  <div class="stage">
+    <img class="base" id="baseimg" alt="Analysiertes Render: zwei Figuren unter Autobahnbrücke" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5Ojf/2wBDAQoKCg0MDRoPDxo3JR8lNzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzf/wAARCAHEAwcDASIAAhEBAxEB/8QAGwAAAgMBAQEAAAAAAAAAAAAAAQIAAwQFBgf/xABLEAEAAgECBAMFBAYHBgUEAQUBAhEAAyEEEjFBBVFhEyJxgZEGMqGxFBWTwdHSI0JSVHLh8AczU2Ky8RYkNENzRIKSoiVjg5TCo//EABkBAQEBAQEBAAAAAAAAAAAAAAABAgMEBf/EACURAQEAAgICAQQDAQEAAAAAAAABAhESIQMxQQQTUWEUInEyI//aAAwDAQACEQMRAD8A4fDcHqa+iaprRiLIBgtUp1s8st/Vup/x4fs3+bNHhn/o4/4p/wDU5qztJHntsc39W6n/AB4fs3+bB+rdT+8R/Zv82dPBl1Dbm/q3U/48P2b/ADZP1bqf8eH7N/mzpVkxqG3N/Vup/eI/s3+bJ+rdT+8R/Zv82dGslY1E3XO/Vup/eI/s3+bB+rdT/jw/Zv8ANnSrImNQ3XN/Vup/x4fs3+bJ+rdT/jw/Zv8ANnSrBjUN1zv1bqf8eH7N/myfq3U/48P2b/NnRyZdQ3XO/Vup/wAeH7N/jk/Vup/x4fs3+OdHJjUN1zf1bqf8eH7N/mw/q3U/vEP2b/HOjkxqLuub+rdT/jw/Zv8ANh/Vup/eIfs3+OdHJjUOVc39W6n/AB4/s3+OT9Xan/Hh+zf450smNQ5Vzf1bqf3iP7N/myfq3U/48P2b/NnSyY1DlXN/Vup/x4fs3+bD+rdT/jw/Zv8ANnRyY1DlXO/Vup/x4fs3+bJ+rdT/AI8P2b/NnRw1jUOVc39W6n/Hh+zf5sTV4N0vv8TAewabb/8AtmrxDjdPhNPfeb92P730zh/p3NNnOTJu1c8vm80w6x9vZ9N9NfL3l6anTmdNSKesH+OD2ep31If/AIP8cz/psb2wPGlb19c8n3/L+X0P4vh16b9PQJ7PExi+Tpv82Xnh05FnEwT003+bOScXbs/jmjR4m3aSPmOdcfqsp7jjn9Djb/St/wCrdT/jw/Zv82Q8N1P7xH9m/wA2DR4ycK5vfj69c6OnOOpEnF2c9Xj8uHk9PD5vBn4vfpz/ANW6n/Hh+zf5sn6t1P8Ajw/Zv82dKsOddR59ub+rdT+8Q/Zv82T9W6v94j+zf5s6WHGobcz9W6v94h+yf5sn6t1f7xD9k/zZ08gY1Dbm/qzU/vEP2T/Nk/Vmp/eIfsn+bOmZMai7rmfqzU/vEP2T/Nh/Vmr/AHiH7J/mzp1krGobrmfqzV/vEP2T/Nh/Vmr/AHmH7J/mzphhrGobrmHhmr/eIfsn+bIeF6v94h+yf5s6gZKxqG65h4Xq/wB4h+yf5sh4Xrf3mH7J/mzqZMahuuZ+q9X+86f7J/myfqvW/vOn+yf5s6lYaxqG65f6r1v7zp/sn+bCeFa395h+yf5s6lYaxqG65X6q1v71D9k/zYTwrW/vUP2L/NnUDCY1Ddco8K1v71D9i/zYf1Vrf3nT/Yv82dUMlY1F25Z4Vrf3nT/Yv82T9Va/960/2L/NnWDJWTS7rlfqrW/vWn+xf5sP6p1v71p/sX+bOqYayahuuT+qdf8AvWn+xf5sP6p1/wC9af7B/mzrVkrKbrlfqnX/AL1p/sX+bJ+qdf8Avel+xf5s69Ys9SGmXOcYnmoZNQ25f6o1/wC96X7F/mw/qjX/AL3pfsX+bNM/FeCgoa8Zy8tMZP0BxDxOc58vD8DxE5JZzxICefvI1jUNqv1RxH970/2D/NkPCOI/ven+wf5sslreKSnpwNLhtDnkgykzShXYo7eeDieG40hGWr4hMGUYsdKBEpQ6tvfHRukfCdc3eM0Q83Rf5sza+lo6DWr4rwo+XslfoSvN3EeEcNHh9Seo6urOMFJaurJ3DrV1+GbOE4ThtHTg6OhpQWI3GAdvOsdG3nrlMvhp6uvfRhwcgfmyDJo8N4vrzlHT0NKBFBdX3UUuqF7Oeh8N/wDSR9JSPpJxuG/9VxR/zRf/ANTHRtw3wnj9TXjo6vG6elKUGV6WnzBSFbp55l4fwLV43V4jT1uPnL2EuXeKEuu9Eiumem1CvEdH105H4mZPCSvEfEY/84/Vca6S27c3gPs1B4fT1Yz4bmlEtlw7J+rLL+F8H1jV4iEOK0o8sy/6BpsHY5ts7HhbfAaXoJ9FMnC/+u4yPrB+sf8ALM6jTkavhOvHjdCLxWlcoyB9i0VT05t/rk8Q8I4iHB6k5cVpyClDRR6nfmc6/FbcfwT5sz/9f8sPi1HhvEXR7i7vljUXbCeDcSg/pmjuf3d/nzP4f4RxEtGRHi9II6kynRXcXf7xnS1fGfDeG0x1uM0YpEUJC9PItzi6H2t8M4WOsHtdTm1ZSjyR2RbHdMaNxofCOIPEiH6Xpc0tFeb2DVD0rm679bw+JeEa+nwU5y4vSSLFo0Eep35nOPxX21JcZDW4bg/uwY1qT2bRHY9Mw8f9r/EeL056RHS09OQCRjb59Vy6TlHsP1LxP990f/8AHf58xcJ4dOGnrs/EOH0ow1pxWeklt3f3yvhnjNfx7xTiCtXj9Zj5Rly9fQr/ALZz56s9STKc2Stqu6+t5OKc3tuN1uD0OL0JT8X4aXKSJS09FkR2OoSbv4mYeN8c4T2U4aXFOtzRTbhWJuebP92eUs+fmfwwMg6vzNsvGJzrvQ+0vEaenGENLTYxiAo3t88zanjnFS1p6sZ+zlMB5Aqi66jnGlxGlG2WpE+CfllMuP4eNpJX/ljX8Mn9U3m6E+InKc5OrrjNuTHUq186MpYaaq86u6843+GYJeJw/q6avmofxxP03idXbT0vhUVy7i6ydH2WjdhqfKR/DA6ekbhqV1skfwzAafiOrvUo+u0f88Y8M4qe+rqxPiq47+D17rVKXCw6zr/+4fwyZVDwfTPv60n4B/nkyaqbxfSPDP8A0Uf8U/8Aqc1Zl8L/APRw/wAU/wDqc15uJQyYcmVAyZMmUTBhyYAyYcmAtZKxsmAtZKw5MAVkrDkrBoKyVhyVg0FZMlYawaCslYayVgCslYayYArJWGslYArItCvQLcOVcU1wusnUhJPo5L0sm7p4fxTxF1uJnqSlsrRfQ7ZhOPj05vxzH4iTjG1d85lvnngnj5dvq5eb7esY9FHi76OWQ1ZSTrnB4bXYzCXTO5wutpoXWc88OLt4/JzadNk+eadKcoouJp62nWWmpB6JnKu8bNLX2Lc38HxppT33i9Ty9c4c5cu50wR4mkLxhbjeUM8cc8eOT2kJRnElFsSxMfOB4R4iQl7PUfcl38nO+I0nR3HPqeLyzyT9vh+fw3xZa+EyYayVnVwSsmSsOBMmSsNYVAw1krIYEw5MlYEMOSsNZAKwhkDGrChWEMgYQwIYayGQwIYcCkS5NHmtZRqcfwmk1PX078ht+hjY0VjBmH9ZQlXseH4jUtofZsRfi1h1NfjXlI8PpafNKr1J3v8AAPTzxs23Bk+Oc/U0eOWBq8YQ5pcqaWmFbPdvy8sGt4dpjB1dbX1WUwSeo0j6FGQbNXiuH0f97r6cPjIMzy8W4Wn2XtdX/wCPTUfnVY0+C4XQjB0uH04pqR3Il9Tv1zRxQGh6Eo/mYVk/T+I1NT2ejwaalc1asyO3ntf0w6P6y4mHM6uhoipUYMkprqodsYK8Z+Oj+/NHA/7jftOR/wDs4Rk0uBnxBJ4jjOInyyYsYyIDT6F/jh4bwzgzW1ubQjqMZAOpckKHq33zZwhtrHlqyw6B/wCY4g/5j/pMBOHhDT4zWjCJGPJFAKO+PLbj9PydOX5mSO3Hah56cX8XDqbcbovbkkfiZF+A4krX4Z//AKif/q4eOP8Ay6+U4v8A+xlPiHFcNoy0HV19KJHUF5phRTmHxP7QeGR4aUI8THUlYhAXoj16YNuzxJfD6p5wT8HJwrfD6T5wPyM83xP2y4NhKGjw2tOyrkkTf65zX7Y8XDRhDR4fRhUaGVydjr2wcpHsvDz+gkeWpM//AGcOgkeO4m3tB3+Cfuz53L7ReKPNGPEy04ykySAG629r/HMOtxnE60l1uI1JykbspLe+xvhOUfS+M4/g9DjdCWrxOjEjGRK5ll1W3yzjaP2i8N4TxLjdaWsz09RORhFbTr5Z4Zk7ydm9vltiSnGKcyHnbXq4Td29rpfbPR4bhzS0eEnOUVSU5ERFXteYNT7Ycc689XQ0dHTdQBEZdBCunnnlJ8XoRZc2ob9a369col4lpRj7pJd/TJuL/Z6Li/tB4rxUx1OKmMVY8gRrttW+YdXiuI1qdbX1dRCknJb+ucafii/c0z5t4seL4zXX2MelfdjeNxeOXy6tva+tm/RwKB29b2znR4bxGbvJiesgyw8K1Zt6uufi43U4ye60T4nRge9qQ+F25VPxDQj0WT6H8ckPCdL+vOa+lBl8PDuGg7aY+qrj+ybwjFLxMv3NJT1a/LF/SuL1b9lobPciudaGjpw+5pxPgBlp0y6pzx+I43sfEtXrzRPiGE8K4if+91g+aude99sCuOKfcvw5sfCNI+/qyfhR/HL4eHcLHrBl8VzTWMGOMTnkrjoaMPuaUD4RMsK7YGzJeX0zvY3gW8GHKgVkx9smNK9v4X/6KH+Kf/U5qzL4X/6KP+Kf/U5rxPTpQwYayVhAyVhwYErBjYHAFZMOTAGTDWSsAZMlZKwJkyVkrAmTJWSsCZMlZKyiZMlZKwBhyVkrIJkrDWSsAZk8W1o6Hh+vOXTkQ+Lt+/Nmcb7XRm+AcS6fWFSfgJeTL/lvD/qbfP8AxPVNTaLtnPho6mpIjCKrj6HPq68IgqoUHXPc+HeHafC6UZTgOom9nTPDln9qafSw8f38t+njIeH8R1lpsa8zJOU9DZsz3uqaUopKAnwzzviXhmrxck4TRlORvUS8zj5eeWrHTPwTx47lcOPHagm+atDxCd7uYeK4PiOE1eTidGenLylGsrgpnbLx4158PLnt6LS40nGl3xJarzbdM5OlrMUzZo6nNV5wuGnqx8vJ2uBnueeer8G13V0pact2FI+jnjOF1ASs9P8AZ+ZLiJF7sOnnSZfBbj5E+pxmXhtd2sOGslZ9J8YKw5Kw1gTJkrDWQQMlZKw7GBAyVlWpxXD6W2pr6cXyZF/TKjxDRk1ow1tV6+5ptfVoxsa6w1mM4ji9RTS4UiDu6uoFfItyQjx2tFlLX09ItKhBXZrqv7sbVtrFnq6emLPUjEO6hmJ4Tn0HU1eI15vLzVz8pdX0Kx/0HhdLS5oaMOZS5Jb1O7vjYZ8S4W0jq+0TtpxZfkYs+PmknR4XUkxLlzJGvjbf4Zo14hGAABOOwV3zObz434H5ORKk5+IMGScPpBVbsn9xk1uF12JLU43VbkFQCJSh5L3881a5/QPy/Mw8T/uh/wCaP5mFZdXw7ho8jKEtRZgupNlYvq1miejp6Rpmlpwge0NoxDz8sfiNoQ/xx/Mw8TQaa/8AEj+eBOIN9F8tQ/JycR10f/kPycTi9XT0vZs9SEAmLzSCjMnGeM+HaZp3xUFJikfe2+WBv4gL0r7ah+/JxJtp+mpH884fGfafgqh7KGrPlmStAKPi5i4r7WamqBo8LCASJDKS7jfasG49VxR/Rx9Jx/MycZtw8nyYv4meH4n7R+I8RFg6kdMsahEOjYW3mHiPEeN4m/a8VqzHqMmn5dMm03Hu9fiNHR8XjLV1dOEfYtspAdXKdPx7w3h9KXNxBJ55IQF2Vp8u+eClKS8yq3bb388VkBdgdzy8zGyV7M+1fB6DrcujqzZTZGwWUeuYZ/a7Wjqak9DhYRJpvKS1RRsVnlNXitDSplqC9q328szz8S0T7pN7dKybiyZPS632j8S1dR1DWNOTGv6OIUDdb355h1/EOM15Xr8VrS32ubVPpnCl4pLfk0i+u7eUy8Q15XSRHyP45OUXhk7LKzfrXXrdYs9SMX3pxjve6BuZwp8TrT+9qSryvbKlVtW/Vyc1+3fl25cZoRLdQ6Gxvf0ymfiWiDykpLd7UZyaXDySezjlWvtxvn4o3cNLbtbeUy8Q126Yg+R/HMxpr1o+eH2fm5OVa4YmlxOtMqWpJPK8pVXdV9XLOSJ5uTlidAybq6ivJS9ssKO2S8ik5Xyzr+BxqGo91M5VnpnX8JSMZeSDmsfbn5P+XSADrkUMVlisrzs8x18sl4g7Ye2Ay312wc1YqLh5bwg81u2TrkI4RDAlYKw81ORkYEq8nL2ycxeRkdsL2nLWCsnPvks6uECsmHmMmB7nwv8A9FH/ABT/AOpzVmXwv/0UP8U/+pzXknp2vsMmTJWEDJhyVgDJhwZdgYcmTGxMGHJjYGTDkwBkw4MCZKw5MIFZMOSsAZMNZKwoZMNZMAYclYawBmDxyHEz8M148Hpw1NRjTpzLJR7h6pnQrJWSzc0surK+ccD4tw+lKo8Np6MzZ5YA+o7XnUhx8dQERvOZ9vOChwfi0NfQOX9IhzSD+0dX57fjnE4bjZwS1zweTwd9Pq+H6rqSx7D25JpTNXDcW8JprAaW1PhWeUj4hQXebuF8WiVchM54zLx3cjt5OHmx42ut4tLS8T4GcNSIyj70HuPp8emeTeBYyRNzakz0sOL0NSmIX12yjijT1CyuY7mavmtrHj+mxxx7ea1+HlpNptiaWojnc1dE1YIl7Zw9fSdLVT1zeGXKdufkwuF3HQ4biKS3PSeAa/8A5zQR6yp+ZWeM05UlZ6X7My1JcbpeziSkKgyoUHvk46zla578dfQcmYw4/VkjPQ0qq6izdzzU/LFOH1JaDqavFa0mnYSJ19C/xz6G3yG2UoxLlIiea1mefiPCQa9vGUvKFyfoXiS4DhTUhJ0iay3dRZLs+a5o04RhrMYQjEImwAdXAp/TWV+x4XXnXdiRPxTEjxHGakoQjpaWkzGQyky2PMK3+ebNPcn/AInKIH9Nw/mab+7IKvZ8VPQ9rqcUx2vl04AfVtxp8BojGU3V1VkCz1FE+F1+GX1XBn+HLNY+5/jP34FUeH0dHX0zS0dOFi+7EPLLon9PL/Cfm4NRDX01SuWXV+GZ9Tj+E0Nebq8TpxOUN5HW3CtOn9/U/wAX7jJof7p+Mvzc5cvtD4dpT1K1JTuVnLFp2O7WYX7U6emSho8LKSyUZSApV7X54OnoevBX/wD0/wB2NqtaF+g/iZ5DU+0vGS0nShDShHl5bpWvrmPW8Y8Q1gJcVPl7kaD8MJt7viZRjGMpyInPFVaDfOZqeJcHo6vGE+Ihcg5QbvZ6VnjNXW1Jt6mpKd95SV/HKpSDdT5uTZ7e04v7S8CaLHS9rqSoqo0bPrmPi/tV7SDHR4YCxGUr6N9A/fnlJa+iXczfsN4jxelE2FvyMcosmT0PE/aXj9bYdPTLE5Y3SbnW8w6/ifH8R7upxWog3RKj8M5EuN/sw+a5W8XrLsgehmeUXhk6M5Sk80pK91d8HNytqB3trOZLW1ZdZy+TWVyVbW/i5Lm1PHXTlr6UbHUK9G6+mVS4zSLC5Haj+Oc9YnWQfPElqQGrv4GTnVnjjoPG3fLD4K5VPi9VdgE6JmM1w6GK68noZN1qYYtU9fVluzlfTbb8sSUl6rfrmZ1Z+f0MRlJ6yfrk7XU+F+rEYJ3NzKSEnt9cHcQVzQTiUyS66YFXsZVumE0RN5PyMd1oDs/hiuuHQv44VDSievzw8kToGVusvQrF5tSXS34GNG13TFs7plZp6sneL83CaE3rWNJszKI9cSWpHteWHDUXKVfDBLQiHfKKmd9DF53tl3swOhgIHYxoU+89Lr0yI980Rj12xGJjQrIXnX8O2kh/Z/hnLD3ivPOr4c1qN+Tlx9sZ/wDLexvJVYeYwLbnV5kyVkDDuOEGsC1k3cmUBbydsNBvthyBMlK4WQYOcwqVhrBzZOa8CVirWMN5KvATfJlhEOuTLo2954Uf+Sj/AIp/9TmusyeFf+ih/in/ANbmzMy9Ot9hWSsODKgZMNZKwFrJjVkrAWslYcmAKyVhyYAwVhrJWAMmGslYAyYayVgDJhrJWBMmSslZdiZMlZKxsTJglOEC5yA81DKHj+G3IavtE7aYyfwHGxorDmT9MnIvS4XVS+sqiXdd2/wxY63Ga0qhHR0jmY2rJE67FGNjxX+0U1DxPh2X3HS93423+Z9c8jn0j7X+E63HeFz13W9pq8LcoxIgMdub+Pyz5xWccp2743cMSceMpD3yacTvlvswB8852x3xl9rdDWnGqknzzoaGsyd285kI1m7hhszhnJ7erx2+nSg25h8U4YT2gZv0Y2GJ4gkOFlzPwzljbMunfOS49uBpiyD1z1v2T068Q0QN7V+FOeS0Z/0vpeem8C8S0/D9Z1p6UtR5EiCFPm/TPTxtzjxXPHHx3b32mf0mp8T8jE/+l28j888pqfariXnlo6GnDmeqsq2r08sx63jviGoEHiGMEoIxDz79c9j5u3utRrU0r2LevwcpnxnDaOrJ1eI0onKdZB3c+f63F8TrSfba+rJLplJfPM7rwi+/OIHW3cybHvJ+P+HaJO9dm8yhCK38+mc7U+0uhHV056WhqSIwY+8gL+Plnj5cdw8Y7z5k6Ub5VLxPTo5YSXz2MXKLJk9ZrfabiZaTpaWlpQAq21r8Mx63jviOub8SgNhACn4heeZl4nNbjAPVVymXHa8uk6PQDJyizDJ6LV4jX1pXq62pPbrKS1maerCCktSJ8UM4MtbVn97Um/FcUt7Lmbm1PG7UuO4eJvqWnkLeVT8T0hGMZSTu7ZyyEnpHGNKT1cnKtfbjbPxSe/JpxB828pnx/EN1MB7AZUaPnL6GOaUeiL88m6vGElr60kXVntubuW6Woy+8qnW3IQgdAvCkURqvpktWSIyiO8j64HWgOz9DKWErSPvHmOE0ZO7R8XGhY65e0V+LiuvJ2Kwex6XI+RjmlH1fhhdq3Vm90+GKyku6vzzVHQuq01+Jl0eF1OhCMfjWE25/KvQX5YTSm9vrnReFmIMjfyLxjgw6yXHZuOcaMnqhh9iBbJ+RnTOF0jdivmrlkNLTsqMdsqbco0o+S5ZHQXeOn9T+OdKcC9jAAGNJthOG1KNg+eCfAyZWzN+tGdE3dzbAtqGXRtzjgo9GUr+mOcJpm/Lfxc18tbpjA+W2NG6yw0YxdoHxrGkRNg3y6Ud9sTkV2wm1TBOu2IRBbLzRKKFPXERemDaqUb3rBLTaGstpeuC17YVTyXs4koAbZdIbxKeuBTEcEo75Z8MVLwKmNJ8c6HB/7wrycxSszdwLWpH55Z7Zz9N9OGtsb5ZH0zq8wdMlmD4mCwwGvvg5vLAywWORU5nvktw0O+StsBaXBWOV0MIGDZKrJfpllGSjLo2rH0xjbClYq+WQPzGTKVyZdmn0Lwo/8jH/ABT/AOtzXmXwo/8AIw/xz/63NeYnp1oZMOSsoGTJky7TSYMOTGzQZMOTBoKyVhwY2JWSsmBQLWj1awDWSsonxnDwsdaKnYbfoYrxd/7rQ1ptXfLyn4pgaayVmX2nFzQjpaWmItymqHwD188BpcTPldTiKJO5pwCtl6t4NNWVanEaOl/vNbTi+TIHKnhNKReo6mo8we9NTr5dPwxzh9HSNX2elCLVbRDtg0X9O0mvZR1NS2jkgpfx6YP0jiJDycLy01epMPwLxtLbWmdvaNf/AI5bK+SVf2g/Exs0z8vG6kkdbS0gBeWDJ+q+nlgOFZ+z9rxGtPm6hLlOi9gzV/7k/IifvxJTjH2TKUYgWq0dMCj9D4aGnqSNGDIWmRzPQ7tuagDUAAOV2D1Mxa/ifA6UJk+K0+ZehK1+RmTW+03AQmsPaagFe7Gt/nWFdaO+keTP/wD2yvhW6a/rz/PPPav2pSBHR4WqbGUvW+gfvzA/aDjgrTYaYK+7G3dtN7ybTb2eoDoawljYnntnyn7R8EeHeM8Tw8CoEuaB5Rdw+V18s7Gt4nxutFNTitRJNoSofkZxvEtKWvKWsS5kiW3d5nPTr4pbemCE6ay4lYd8ygrWdfwzg/a3ObUT8XOGdkm3q8UyyulGnFsszdw0VShzXLR047UNemPppGgKPQzzZZ7e7Dx6XaBVCU5zvtBHUk6UIoQq1Wrc7GkE4g9fPMHjnCy1uHJRPf0lUPLvk8dnObXzY2+O6cTRho6SSnPme4Dtml43SJLGMqpAqs5jMMDqeRnt2+TZv26EuOlTGMClvdvEeL1WqQrpRmFmvSsnPLzrLukxjTPX1JddSTfrlUwerv53lSq93JyyezkXoSKrVfXGNJeqGCMJDZRlipG6FPLAX2QdVxiEA6W+ric83pH8Mgai0Wfhk1TcWhEOhhZROriR0NSWynzcY4Xsy29DLo2ntIne8DrR7DlsOEg9bT45dDh9KO7C/jvjTO2T221B+OQlrS+7FfgZ0I6cHpGMT0MsgA7JXwy6NufHheJnvSHqhjHA6r96QPxXOjzXQY4LWNJtk0vDuWpOovmBWW/osR2ip6ua4iIG+PMsKcujbLp6OmS/3ZfqXlsoVvEo9DGT645sbGE2rIDHbrhjpob9ctihdmHTsbN7wqjkttyIrv0y5N+mTlv1y6RTLrQbYYQrfLCO9ptheWysBOS++I6dNOXO29YUvrgVMOlYvLv0y5HuYoW+WAkoldMETastnHcxZFPTArlCm3K6qXpmi7N8SUSsCqceYsxCNmXhtRi3XXAoTsYnKnUy9PesNsSfX0wK6G7ymcaXNEjezKpl7OBTVuLI32y6UeXYxU2sFcLFL13M18FtqwvotfhmZgrvFzTwu04X2TEvaZTquooYGRlcpwj96YfFDK3iNCPXVhfo3nTbzaq9kVla3lDx3DH9ZfgOVy8S0T7sJP0Mm4swyagTDmCXie/u6R85ZXLxLVekYHyXHKNTDKunbk3zjy47Xf69fADKpcVqS+9qyfnk5NTx13tjdr54stbTg+9qQPjIzz7q31kvxcX2h645LPE78uN4eP8A7h8hcpn4noxNuZ+B/HOK6np+OTnXsB0yc6s8UdOXi50jpPzllMvFdV+7pxPxzJyB2ycp5ZOVa4Yz4XviPEPRifCJkykDtkxurqfh9i8K/wDQw/xz/wCtzZmTwo/8jD/HP/rc15pzvtMGR23UMqnxGhp7T1YD5WX9MItyZneLhTyaerOi9oIV8WjBLV4lvl0IxpB5577+gP55djTkzMR4mSEtaMd6qEPn1V/LAcMS5fa6mrO5JTNCi+xXljYvnqwge/OMT1Qyl43QfuLqPlpxZfkVleho6UNZiacSgRS3fm7vwM0RPu/41/PGxUcTqTr2fDTpUGaRL+G728sA8VOt9LTFTYZIl+deWXRq4espfvyRQIXt70n88bGc0NSXL7XiNWVyRI1EovyL7eeT9E4cLlAm8yXNZO1+d42pxnDaRB1OI04hJW5HrmHW8c4CEWJq80hk1GK9brfp3MJ03aMQ4dIgDpnQ7o/xy9alM8on7887L7R6UNDk0dCS8oXJA2A7XmXW+0fFzlJhDSgSKqle/m+uRenrACZ6Ra+picxGOkykG12tdv8APPFa3i3H6183FTEKeV5dvLbMGrxTKpausyegSl0+uNn+Pd6niPB6UanxOmJNUJWgL5Zi1/tDwMDUIOpNk0csaOh3azxM+L0Y7ErHdo75VLjtPdIyXoXtWNwkr1r9peSU3S4a1kyuUqqwOgemZdX7R8bKKQNKAysCNpvffPLy46dBGAebd5VPjNaXSVbdgyco1MK9DreLcdMefitS3Zp5fy+OYNXi4v8AvdfmTrzSt/PONqTlP781+LlMg/tHzyc1njdaXHaBbzq9qMpl4lErlg0ebWc8ipslYeTzcnKtTxxqn4lqq8sYx/HKZcZry2509DbE5Y+V/PJUTyybq8ZCs5y3lJfi5t4PWNLhZkjaTX4Zk5gzdpcO6nAiH3pKfl+7MZ3rt38Mu+nOZ1L550OE42UNMgdswa2lLTlUirzV4foS1Ww6ZM+PFrx3OZ6dbR1JalLbebdPTunK+E4ViFmdCGlVbZ48rH0cZddholVmh0o6oW0nRysjWWQUzm6aee8V8A1Yylq8NCzqwP3Zw5aTCVTETqJn0WEsTi+A4bjYVr6YvaQUnwc9GHns6ryeX6WZd4vnhAvpeMROwZ3eJ+zXFQ1ZHDsdTT6iyB+Y5S+AeIx/9mMvhM/jnonkwvy8V8Pkl9OURvptWQiu1bZ0jwTxG/8A0z8eYr880aP2e46Vc/s4H/NK/wAry/cw/Kfa8t+HJIHL0388aJEKQvO7H7Naie/xMD0Ir/DLY/ZqJ/8AVP8A+H+eZ+9h+Wv43l/DgVXTIBvtvnZ1fs7xMb9jraczsNj/AAzFq+HcXoX7Th50dws+pm55ML8sZeHyY+4xkactIiZJFNSEfJKwhtWbcqMIl49bVW2CJRtjghvl0iRAMJES++QLwgHwwmxhE75YBYLla1hFXdwq8A6b5ItLeVGom14fa106+eBdGq3x6s2zN7S0tyw1Tp0wm1pHzyyJcdisWMoy6dsMZW12wbLIFo64QrHUH1yUfBwpEvpi8vlhkkTZ65NPUgfflk6JtGKlOQK6tuGerptsX8MrdaJ0N8biyVY79DJyvXKv0j/l+d4jxEnYAxyi8K0HRKtxGK3eUOrNdmn0ySnJ2W3M8yYLZBXliPLvaGVCo3g6/DHNeB2US6cSUouCTWJJayc6swhnUNwi5WyXthrbfC0F98cqvGK5WYn55ZLcwctGTdNQl77rkQcZO7i9HfIoNcquIi6U6/sofTGntF9cMadGfnWdMfTnl7cshLv8euH2h2MfKMpD+0fIwc76YuTIosl74LcmTAmTJkwJkyZMCZDJkwLsmQ3rJlZTJkyYH1rwyfEPARYmnGNylba/ebK27+ua/Za0pJPiZVzUckSJ0v1fxzL4bq6elwEfaTjEFPekH9eWNreMcBpovERl7y1Au9q7ZpzutrjhdFpmOo1K+eSmztstYeH04Q52MCIKAAVRHOVq/aXhYx/otLUk8jV0b3mHU+0mt7xpaEIkl3VUE38sJuPUSN5R6HLE+q4ekla3mdfQM8XreO8fqXesQsB5YgHe788wcR4lqzH23FTVbBm79jvge91OL4bSR1dfTgElbkDsOY5eOcBpyB1uZF2jFe+3bPBy47Rj/WV9BfgZVPxGNVCD5FtY3FkyezftFw8JsoaM59KWgaE/NzNq/aXiEDT0dOCK2rLqvw888bPxDiG2MYBWyFpmefF8RLZnIvsFY5RZhfl67X8c46SJr8gKhGIdfXrnO1/E5T21uKk+dzX6Geck6k25Ml9XJ7NetZOazx/l19TxHRL95knQCzKJ+JxNoabv1tq8wmkm6/hh9lHzXJyqzCND4nqrtGIeW+B4/Vk7zY35BlHLCPWvnh5oG1nyMzyrXGHlqzd5ajT5vXK+ePmuBnHsX8sWud93Tb9ML0b2pew1iurZsfPLIaEpdYS+e2WQ4Wa1QfHfLpNxmZydjp6GCpvm5u/RZGzL6GH9GidbcaOTByS7183JyPdM6HsIB9364OQNgxo5RhNO+lr6Y7pzegjmvlrLdPg9fV/3WjqSPMi19cXU91ZbfUc32M+8tvjkND1c7MPBuNn10OU85IZr0PBNOO/Fa56xh/F/hmL5MJ8umPh8uV9PPR0BkFKrQZ6rh+BIaENOvuh9e+aOG4Hg4taGjGzrOW79XOhDTInTPL5vLy9Pf9P9PfH3XmvF+AIw05BTaZs8J8OdLhyU41KTdPY7Z1dbR0tacGZZBsOy+uaIx26Zzuds07zxyZbUaehEx5wA2y7lwMbzDoySjWLVZqlDKdSNDgIavL1yvW8R09MbTbM3GTYRazy/H8ROcktrOnjw5Vx8vl4Tb0Gt9odKCg3Xlmd+0xHpGT8KM8v1w56Z4MI8N+r8l9PQ6n2n1X7unR6uIfaLUT3iV+mcDJmvs4fhn+T5Py70vtHq/wBXTfnL/LKpfaHil229Bc42TL9rD8J/I8n5dyP2k4qJuC+bmnS+1E417SMpPlsGeayZPs4fhZ9T5Py9jp+O8LxER19PTX+zIH92PKHhnFRuMfZye8Gq+XTPF5ZHW1IfdmnzzP2bP+a3/ImXWceh4vhHhklCZqaa0SCkfJMpFrM3BcVq6mnOM5LGgpcvJHWs7YZamsq83kxm94w2S6xWXoZLXteXnHOYU3XINYio7bGELQXq1kvki8F+jw2txLWlFruuwfPN+n4Mp/S8REfKJf55Zoapp6cYQNgrLTWs65wy8uV9PFl5st9Eh4Vw0PvampJ9EDLo8FwQ76cpPrJyqWq+eL7bfrnO5Zflj7mbbCXDaJWnoxj+L+Oc7iJOoylACTvQUOGU1EvK4bt4ls72Y55S72y+11FuS2YGUm1WvjlnGwSZOJtI3rzyiMkM7zK2bfRwsyx2LJfP64N13yVW+FopMNmjIOuBp3xR71hN+uAYp0XBsWZK365ItG+BAN8G47YdrwLWBL29cC7YfVxU8sAfevJ8cjtgd28CVvivXfDaOBdsKCKX0wda3w9TBVdMIju+mKluNv0wdMoqmUh88aH3JHasWVsmulYutPk0ZV1SjOmPpzy7rG5Rl/bKHrgiZMmTvhUyZMmBMmTJgTJkyYEyZMmBbH7pkyRQiD5ZGR55WRvJi85kwune1OP04csfelLlhKg8wfycp1OP1IVL9G1OUumQl519MhHSjQDyhsemY+Ok80S+zmrNTbjjZctacyXis3YiRKre3K3jtaV/0lDfTbNOpDTn96MV9TfM2pwsK92z4OY3XbjPwqnrr96a3v1vFdSNm9/LBPQkOzfx2xTTkO8T5uRfQ+19PxwE5PT8s0afDMgbK+F5fDgr+9J+RWNG4w3qSO+Tklfk/HOnHhNM6l/Fy2PDwOkT6ZrTPKOVEmOzfyvLDT1pHuwfmVnV9mVtX0xiG2OKcnJOG4l61E+OMcDqL72pR6F51iB5ZOSm8SRLlXOj4dE+9KT+GWnA6IbQv4q5t5Trk5b6ZdG2WOhpx6acT5ZYQDLuVMiemNJtTyF9MHLvtmgiOBiHTLoU8gmIxrNDHbpkNKG89WRGB1e76GS2TutY43K6jLys5EYir0DdzXo+HAkuK1DTOvKIyf4Zi4jxmGkMOB0+R7yluucvW4jV15MtWbL55ytzy9dR6McfHh/13XqzjPDuDK04afMd5Ir9cy6/2oRTShddHPMZMxPDN7tdb9TlrWM07Ot9oOM1vdgBfkXnR4Hwvj+JrV4zWdGDvyn3k/dlP2d4TT0ofpesDN+4Pb1zuPFRDrvnHyZTG8cY9PhwyynLOtWlDT0dMhplRPNtfji6uvGI075ztXjepeZp8RzDbnHja9PKR0tPX5prexmqOt0zzenxZCaL3zVHjTzxcKkzjv8AtDlu8R1c48eNv+tt8cshxQ98nGrMo6bqeuVT1BG8y+3s64Jal98aXarjo80UM81x2kxk7Z6XUbHON4hp3aG2dfFdV5/NjuOFIpwZbrRpdsqz2zuPmZTV0mTJkwiZMmTAmTJkwJhBkgb4M28Do3eo9umLdQk3Wrh9M0tIi9Xd+OWWYN9sPLuV0zm6J175BTIgZGnoYQLwxl78b7N4NgxJqRkhuFmL2zlN4ujDWDvlhr+ucI4yjfG/TfXMXCvBfFXZ9viuuGcd4zyxf0mUnyMcKv2q7cNa3NOnTv55xeG1Fd1zrcO3AeuYs055Y6NxhejZ2RzA7Z0dY5tKRW6NZzxs3zeF609f013joLawjtvgq+mSu2bekeb02yDspk2TJErbtgSPx64yUF4DrWFle3lgB60ZEwbuMU4A25fXFq9zHsRO+KbYAneLXnjpdvbEwIu+BSsPfB3dsAFDgY1uZE3XIu2ALcF7N5KXpglYJ57ZZ7S+lZv175m4uXvEDt1zUHftnO1J8+pOfm50c57G9i8qRVrA25bH7plVXyvlh5HLMmNJtXyOH2fm4+TGjZPZnm/TDyHrjYMG05I+WTlPIyZMGxoOh+GDJkwiuf3sGGf3nBkaTJkyYHsolwj/AIT8sxcd/vA8jNsZcsI3/ZPyzBxsr1mvIzeXpw8f/bNWK+TjW3gac5PSqlEbymYmaETftleoWbGWDTwsf6KO3bNYVRlHCn9HE9DNNVRm45VOUd7w8u2GJ641bdcrJK22xgK2w1hPTCFquuALx1j3axOfTOsz643F1TV2yBWVuvpn9b6GB4rT6lvyyWxZjT1vkrfKZcULtF+bglxMk2Ayc4vCr/zydXMjqzd/ywOpN/rP1yc4s8da3brnE8U1NV12M7In3a6Vm5VN5fXEnGMo1OJL4mZue28cbi42TOnPgtKV8tx+G+ZdXgtSN8tSPTr9Msspqs2TDIYtSKTsmDA9Bo8YaelCA/diH4YJ8bfRzh+0l55PaL1XOP2u9vV/J606c+Lt64rxrEd8wEsWbZmp44zfNktnxMnUZF5ZHjZZjyZvhHOeXLft0I8bVbuadPjem7nHNsshNHMZeOOmHny329Bo8VzUXs5sjPbPP8Pq0mdKGscvXPPlhqvZh5NxuZjtmXXiSG8T2198MZEktzMmmrZXJ43RYr5ZhqnPRcRoGpBA3rOJxGhKEkrpnp8We5p4vP4rLuKMma+E8O4vjLdDSsOqoZZqeDeI6X3uFm/4fe/LOnKflxnjz1vTn5Ms1dHU0mtTTnB8pCZXlYss9pkyZZpaUtWVRNu69soGnCWpIjEtc6mnD2cIx8sTQ0TSPd6vfLuvXOeV21IhbkbNshs041lb9cihdnrgE7mFrqYOhgRUcFnfbJeRHrgcrXhyaso+uV50eK4Wbq7xUQ3DJDw6c37pH1XNTOPPfJjHPMtgO222dOHhVdZR+jmjT8OBB1NvIMzfJPhjLy4/DHwcGUgM7/C6YRLMp0eF09JuJv5rm3SoAzjlluvLnnu9Glor0zjcRB0taUHs/hnoIO2Y/EeBlxLGehFdXYYnWR2+eMLqun0/k45arji4VLvOrpfZnxnUfd4DUP8AFR+bmrS+xvjUqZcPpxv+1qG30c7dvobjgXvhVOmeq0vsJ4lKmetw0PP3lT6GadL/AGfcQp7Xj9OJ3I6a/mmXRuPGRfPJXfPf6f8As/0Cvacdqr35dMPzXNWl9hPC4/f1uJm/4g/Ixo5R83NzIO+fUtL7F+Cwq9Cc3/m1H91Zr0/sx4Lptx8P0V85W/m5dJyfIEt2x4RlLYFfQvPs+l4R4dpHucBwx8NKP8M1afD6On/u9LTieUYh+WTRyfE4cDxWp/u+G1pPlHTX92adLwDxfVLh4dxKebpp+efaADphrGjb5Do/ZHx3V6cBKPrKcT83NWn9g/HJpzQ0NMe8tUfyvPqphy9G3zTS/wBnPiMv95xfCw+HM/uM1aX+zWTXtvEyu5DSv83PoZhMg8Ppf7NuBjXteO4ifpGMY/xzx/2t8G4bwjxLU4XhpakoRiSGaKqC9A88+0Z8t/2lRrx3pV6UX937suPtLeni9WBDgtTUeoAb91rON2fjnR43W/oo6J1XmX0LAznyKDNpPyXvlsPumVOW6f3TAOTJkyspkyZMCDkyYMCZMmTAmTJkwEn97F75p4fhdfjOIhocLpS1dWfSMTPdeDfY2XAxNbiow1+IolGkYwdul7L6/Tzwu+nnPCfs7qa8fa8dz6OmlxgISfXfoZM93Lw7iRKgPMUim3f92TIzuvLxBhF/5T8s53Fl60j4flnR0ytOK/2TObxLevN9c1l/yx4v+qq5cVLdsKK7OBEzm9BU2yuRWOjW7iSbwNWnracIhzW1jfpUToL65gQdsSkWtvg5d1njHR/S06Rv4uR4yT0q/hnOZyO+GOohuXjdXWLc8TqP9bb0MWWtOVPM/JzIao1Y3jGoOy1me11F7PzX55OYXplRLzSsPMXvkVZeTp1xLtKxlWgRwpr9MN+eIG+7vksOuA998F21g+GQTtkDHrkQwF/DJ0wCV2wX5YepW2C/LAWelDUPfL/MzFr8Gxt09zy7mb7+OQPTLLU1HGSmn6ODOtraENU94p8zMepwU4/cSR9M1LE1WYci5ccLqrXJXquDW4eel1LPMy9J2pyZMNOAMmTCFuCLtKT2zbpyU3zPoQNrM2QiHTOOdj1+KXQxUTLYS3MroMMeuc/bvOm7TlYXhloaeq2hffKIS2MvjJOmc+46TVnbVpS9jEIbU2VnT4fXjrRs+8dTOOTvq4+nqMJDFpMzZt0l07Mow1I1OJIeogmZ9Xwjw/Xvn4XTP8Pu/lWPw+sasCRs9zyzRFzMtnqtXGWdxz9L7O+FwkSdBlXaU38rzNxf2dBZ8HMDryS2D0HO5eTmy/cy/Lnl4fHZrTxWvo6mhqMNaDCR2Tr8PPELRz3AaTqQlraGnrEW+WcRPxz03CcJ4fPRhqaHC8PGMiytME9Omerx5TOPn+fx3xf4+RwhOTUYSk+guadPw7jNWvZ8Lryvuaa/uz6/GEIfchGJ6AY2deLzfcr5RD7P+LTDl4DX36XGvzzRp/ZHxqb/AOlI3/anE/fn1DDl4pzr5xpfYjxSZ77oafxmv5DlXiX2Z1fCdOGrxPE6U2TUdOAq+u50M+i8dxmhwPDS1+ImRhEst3XyPXPn/ifGaviPEOtrO7tE7ROwZzzsk1HLy+Wyacxje9ZDSc1w0ircsYxj5Zx28XJjhpLl0dKsuEvtlsSLktTbMQrHjFy9gPTIRrIJDYty2Orpn3r27nXMnEavJBfLOFxfETlqcxJKdkemWTa44219U8F8c0NXRjpcVrBOIBKTXMevrnd09TT1C4TjIe4jnxnheOlsM1Tu51uF8Q1YIw1JRfMUzpPJcfb0TzXHqvqYYTPE+HfaLitGUTWl7XT7kuvyc9Twni3BcSHJrRJP9WTSfXOk8krth5Mcm4wmARBGx6I4c1t0EyZDCYXSVjGDCZNqOEMBhMbXQmEwYTAOEwYcm10JnzL/AGmQ/wD53Rr+tw4/Rln00z5p/tVmaHiXDaz0OHQvu2/xMuN7Sx8x4md6835GVT6F4dQ6r3cEvunyzafBMs033fnkICb9cElhsZpL+D5Mq5nzycz5uNppbkvKbe+S8bNLb9TIp5n1yrJjarWR5mDmjleTGxZznrnV8B8C4zxviOThtOUdGKGprJ7sD976Gdb7L/YziPEeTivEYz0OEv3YIktU9PI9fpn0nhuF0OC4eHD8LpQ0dGA1GJQK9Tzb798iVzvA/BeD8G4f2fDRjKaHPrSiM5edvY9D886CNWhZsnXz2+HTHRtGyhCKldL3e3fJLZsW3bbcqt7/AAr4YQlU3W1vUGvr8ayZDaZYtDdt7bVkwPm5ORCO23KfkZzdaS6s3zk5j4rj+JjOMY6qHs4PQ7xHMpxWtd8935l5crudJhjxu3SJJkW855xup3Ivyxzjv7UPo5jVddxruhvfEd7DKjitJ62Y3tdN6TN/lgTe8HXDZVjfwwheAldcCUY9U5GN4FdUjgY73jhu5HfZwK0ro4SUju40o+WQiooLgEnI8qxo6m2436YAsruZCEnasBzUi7PXGEap3yhjUnanNMOD1ZwJxY0+Tk0uwFMa67XiamnLTKu6yuMpNC73jRteSXthHffGjpjOMV+93Ms43h3RIumKJdu+NU3FT5XgH1zT4XCOrrJqxJDFT0zrR4bQj00YfMvM3pzy8sxrhFX0vHjo6s246U34RXPQcPOPDa0dTThGMoojymeo1/H+HmaZCPNLlGRECmi8m+2Z5o+fQ8M47V+5wmvL4ab/AAzRp+AeKT2OC1C+6B+bn0PhuJ0uJhelMvvFaT5Zf8c1NNTybfPdP7LeKyS9CMT11D9zl8fsbx8xNTU0IjsjJfyM93eQcuocq+L+NeGa3hPiOpweuixBJHSQ9HMI+ee+/wBpnAjpcJx8TeK6U08m0/J+ueAzXtqU4XlkI5VGVOXwkNZnLbpjrbRpFZoj0zPCRmiDnGvVgatsl1jG+LI2zDoeEq2y6E/XMd1jQnXfGiZabieWRlmGOrT1y6GpffM8XSZNelrT0pEou/fyc63DcXp61F1PyXr8M4RK8JJHZp9MxcdtzJ6W8DLOVwvHSikNVZR7Pcza6p2dszZpuZSryRne+zeuy09XQf6qSPg9fxPxzzHtc632a1X9ZMb2lpo/JHOnhtmTh9TjMvHXrDDimU8ZxWlwXC6nEa6mnpxtotfQ+ee3b41aTOR4v43o8DFhpMdTW8r2j8f4Z5HxX7cGozhpTnGDfuwKfmv7s8xxP2g1dReTTiD/AGlcxblfTnllnesY63jfimvxuse21JTVCl2N+xmiCES/LPKafFz1eJ05T/tH5523i40A25zyxs9uHkws1t0JatdHEZr0zPostRvtm3T0dtzOfpyskUcyZZDWB65ZPQE6Zj1tOULT8MdE1W+OqJ1MktUDrnGOMlFp2cMuOHbLxXhWri58whnI1oLLbNuhP20+u2aZcJFuQbvT0yzpqXi4UdV05NtV55bHxQ0+g5X4lw04620dnpWei+y/2D1fGNH9J4ziHh9G6jGMblI+fTOsmNm3oxwxym3EPtDrw+5pw+Mrf35p0ftRKMK1NG531i0Vn0HQ/wBnXgGnEJw4jVe7LVT8gw6n+zr7PzPd0+Ig+cdV/feXjg39jD8PI8D9sdfh0no6vIf8OSv1OlZ9Z4TUlq8Lo6kypThGUgOigueZ8O+wPgXA8RDXNPW15Qbia0xjfawD8c9UFVWwbAZJJPTeGHH0YwmC8Jl23ocJgw3k21oTCYMODQmEwGEybUcODDk2aEz5d/to21vDqPvQkPyT+OfUTPjX+1HxM8Q8ajpwR0uGvTindKZP12+WaxvaXp4dbi/HIBRfxyf1H44DaRedUNianX5ZYYmp1zXwx8kyZMmRUyZMmBMmTOn4H4Jx3jfE+y4PSWAntNVPdger+7Aw8Nw+txWvDQ4bTlqas2owiWrn0n7LfYfT4Ejxni8Y63EBcdDaUNN6l77v4Hr1zu/Z/wCznAeA6EXQianEMP6XXke832P7J2r0752ESlbNhSyrLDfrt3wm1bGp0N0G5ttZT/rtgQ+6dgqSVs+fzx0bWJViu4Iu1O91vhkboLd3vS9OnfbYwikA2BjfXpXy+X5Ys2lGa10tFHp/H6ZZIas7KS2u9u9YKAjQVbTzNV5/D4YCSj2LOXcvz6OTGRjctOXvdCv8/TJgfDuL071It/8At6fb/kMzMPLNvFffj/8AHD/oMy1tkvTc7V8rkpywMmNtcVVOPWG8rwno5fZxiczpJ+uVW4eZMaNrvb6gdfqY0eMkdYD8Gsovm64OXyxpGv8AS9NW4JfreA1tOTup8TMvK4OVx0dt/NHepRfnmrh9Q0w5oiZytslp0fxyLp09bTuTOG8Xy7YulJsTqdRzHDidbTEjqIeTufjix4rUG3lfiZdJW/WIzGR174sdeUYMYtHlmR4tSmB8nDHXi7In440bdPQj7Th5SkWg5l04c00Ba3x9PX0fYpHVIyToiXj8LPTiSlznMdATfIqsmxkI0xds6kOJJcOak99qrOTKVyWjdzZ4fHmZc1ME3MDX4fDT/SXV0rpg2PZszpXnH8PXT4rWiXyhR9c6Dqhmb7eXy/8AS6XS8HDt6sfmfhlPtrHyyaM/6UrM6c3SjOUZXGVPo5s4XxLW0JjzrHvGW4mczmXIycEtj2+hOPE8Oa+iiJ70b3i5BzzPgnH6nDa5Efdk9Lz1XFRIzhKJROJJPJcTKu/jy25f2h4E8S8H4rhqOZgyh6SNz8SvnnxpE7dM+w/aPi3g/BuJ1YtSY8kX1Wv3rnyLWK1JfHN434dpj1tXjxd8TCNZol7a9OWadOWYITzTDUKM5ZYvThm2EtsEnKozvCyvOeu3ffQScTnrDJyqaGak2xbpbGdvXLoTfPMUXfrmnTbDJZpcMq2wnePzZmjKumWRlnOx2laIuatLWqHKvTpmGDeWkszY3K2Gqudz7KvP4oV0jpyX8D9+eZ56TPW/YnRU4jiU2ohF/F/djCf2c/Pl/wCdervKuM4XR43hdThuJhz6WpHllG0s+JuOWXkHPVt8t4ziP9nHAT1ubR43X04d4yiSfk7Zu4T7BeB6Fe109bXfPU1EH5FZ6a8N5eVNODr/AGM8A1NJjHgjSlW0oTkJ+OfMeH4XiNTiJRiLCE2PP0KGs+seN+KaXC8LqaUJktecWMYjbG9lfKs8VEjA2DOeWbzebySdROH0iES6us0EgzPzuElnF5GmxMSelGd9N8rJOPGeEYOI8J09WTIlKK+SVmWXg6Nw1d/KRnbJHfGuL2yzKtTO+nM4fgvYhbb3QzbCOxZlqDhiF5Npbaol4THjtWBGXLqXQrtWfQPs9w36JwPsFGUZWp3vPHaZVJ1zocL4lxHDJyajR2luZnlZk7+HOY+3tRwjnA4b7QwkhxGny3/Wj0+mdnh+I0teBPRmSHyc7zySvbjnjl6X3hHEw3l23o94bxRyDjanvJeKOEcm10e8N4l4Rxs0e8I4l4bybXR7wjiXhHG10xeP+Ix8M8I4jilCUYpAe8nYPr+WfB/GZs5ac5KyZKr3XPo/+1LjNaEeC4UK0Zc01vrI2D5D+OfM/EJXDTf+b92dMPy82d3npgihYl74P/c3wyPeinfA/fM6uhsTU7Y6g798WXvUR65WPkmTG5HByOF2GTLtHh9XX1Y6WjCWpqTajGJavpn077If7PdPh+TjPHdOOrqoMOGu4wvvL+18Oh3wPMfZP7F8V4xKPE8ZGfD8DQkkqWr5Eb7Pn9Lz6twHCcH4dw0OG4PhzT0dMuMSJ1DdXqt93rm1AI1HkBAitRDboGwbmJArmiqXahVl13fhhFU40RHoF0AK29Hv1DK2RyrFLEuIXbVeWWBJjfKKtre4bfnixgRWTHYtpv6YCyBlSMhEWuqG1Hl+7FC2QUyj0AQs22/H54ZWxWMohSiPTrsnXqYQk0NWigv3SyzsdsBCpQIttLddLrtW78cWi40S2C0d16tnxx9SmFO0QaklCPe+l3nL8Q8d4DgaJahqTB93T83z8/LCOgoPVdr2KfLvkzw3iH2q4vXSPDVowj0DJk3B4nikJx/+OH/QZlacbjP97H/4tP8A6I5ReK3Lpbkyq3DzONNcll98qxiTeFidnHpL36JkxuX/AFWDlypqjHq4cAJ1yWZKs6Nk7N+WCzJezXlkUmS8GHNMGJNmTlPXFOuWZGoXl9cgcrjYsuhg0JIwidqysyZU5UzJ5lHq5bocXr6Er09RH13xN8m3+jJtdV1fD+L1NfUm6hG67FZuZ33zkeGtTn8s6LLM3283kn9l5JDNHC7DJd3Y+GUcHoT4ridHh9K+fUmRPm1m3xbhjw7xLX4OE+eOlKiXdKHf13zNs2566WxkeeFkPfOf7VMJrONJp0NKfLqRR3Ez3fGTJR0JHR0oufPeA09Ti+M0tHTFZyDb4573jmMNWOjBs0oENvQzGXt18Xt5j7d6jHwjTif1taI/Rc8BxnC6mnE1ZFDnvvttD2ng3OFmlqxk+hufvM8HPiueDCbd5rG33Hux43GysGTDIp26Xgzq4iNNmW6c8pwxacWLjbK2QnlhK8yRllhP1zncXfHNbOQHXKJzvvi6mpbQ5VblmOmM8+3Q4EgvNPfeqc6LPQlHl5IjWyFJnC09ZgbeePHiJXbmcvHbduuHmxk03zWEqdx6PnjRneZHX5wF37Y8J7G+ZuN+XSZy10dNsxiW+Z9GVxcbnd++ctduvJo0yerqR04HNKSRA6q9DPpnhPCHAcBpcObsS5PnJ3XPM/Y/wlhXiHExpT+iim4f2n92et5vXNSSdvL5s+V1Fo4byklknqxhGU5IRiWr2M1t59LNfXhoactTVkEQ3X8s85x/jetrc0dFdLT6bO78XM3ifiEuN1VFNKP3Yv5vrnL4jW5YoZi5W+nh8vmtusSa+symq/NyrnzNqa27vimqOJHHTUz9chP1zN7TITxpNNkdTLCZ55hjqV3xjVPPJo03c554ebMXtjzxjWyaTTcSvLIvfMMdbLoap2wljdGW2WWeeY46p545qeuZsNtK+uavB/EZcFxcSUn2c0JF7HrnMlqUbuZdfXIl3lkbxysssfU4yJREpHezvhvOd4Pqs/DOHmtsoDdZtJZuZdPr49yVaPrhHKub1wkscmtLbxhyklhJY5LpaOMOU82HmybXS3mw82Vc2HmxyJFw4Rynmw82Z2sjx/8AtT4b2vg3D8SG+jrUvkSP4hnynijm0j0b/PPtn200P0r7M8dAtYw5wP8AlR/dnxPWf6KRno8V3Hl8mOvIxydo5G+bbtvkfux+OS7F+WdmiKu7h0/vOK9MMOuVmrM6PgngvHeN8WcPwGizTec3aEDzk9s7v2M+wvHfaPUjraxLhvD731U3n6RO/ffp8emfZPDfCeB8E4KPCcBw5paeyhdzToyeq9Hf5eWVlwvsx9kPD/s7oEhjr8ZKIz4iQXve0Ruir9XO9KcWHLKiMoEhvo/H4bfLLp6Yu7atKytd+wV8PniajQRVG75gutnr82vT6ZFZ5gaU7IwCto308qfhv8crmNtnLFoRaXbsVs0mXTptAtKQ33u7R6UWfTKpkYRkKyJWt73XQNu/8cCmEloAS2hE2HoV26HdxVZv9GVdNKPff55X4hx3DcFpE+K4iMCIsSUgvvVH+t88l4n9s4QJQ8P0+elSc+h8D542PWampp6UXUlOMSustk89/LfzzheJ/a7guGJ6el/5nUCrFI3t/nnh/EPGON4+TLideSO9XQfLM3CaHEcbNjwfD6vES7mnFQ+L0Prk2Op4j9ouO49lF1XT03+pForORqahG2cwPNc9NwP2H47WjzcdxWlwsdr04PNPftvsP8TPR8F9lvB/DqlDhf0jVqzV4h50a8uhv5GNWr0+fcDwPH+IyrgeB1tY395CEdvVq8mfV4xInLFjUgOUNivM+X5ZMaibfBeM/wB7H/4tP/ojlGauNh/SRb/9vTOn/IZn5Mu1LkxuT4ZOVwuqWPXLMQKxuYyVZ0OTBZksyKE+h88XGm38DFyxmpkj1wY0euUh6/1WCjDkzLWgoBTbF5nGejleWM39G5sNsijFxodHKd+g5XJyuWZBpGumTbXELOyZNqyvJjSbdDgNpT+B+/NsZW5h4D/dy+OdDh4c+pEbpS07GZtk7ebyd5PTfYSGm+NR1dWvchJjfZrr9Lzi+IcX+l+I8TxC/wC81ZSPgrX4Z1Z6H6r4LjOP4LXJ6DpOnG334yltSfBUejWeSNWRmMdXtmbsdGUwL2xTVBrrmI1V6uWQuUj1c2mnvfsNwum6pxE65gUvsHfKdXjpy47V4iMmLKaiPZcr+z+vqcN4fr68vdiQYQvupRX55jk5y12m3oTR0PG+D1eGGMNWcGMoLtLbqeT3rPlHiHBa3h/GanDcRFNTTkj6+ue74TV1NPiNPU05JKMhEa74/wBrvDeH8X1tSejINUbhPs2Wj6X9MTLhe/T0eLK5dPm+TLuJ4fV4bVlpa0GM4u45Tnd0TJhBemOaWojIhLlO4Y2uqW6ws3tiZMaNit4MmauG4HX4neEPd/tOxhP9ZcmdPW8H1tPTZQnCaG8Tr8s5qI742ksvoYqZo026zMdc18NDmQzOepHbx7t6atJSN756f7PeAOtKPFcfFNM3hpJTLyX09O+c3w7hdOMiesbG8R6LnqPDPEtM1I6XEzfZyaJdWL2fUzhZbNxfL9RMcuDuEwANg2A7YfaGZtfm0NWWnNLO47J2TE9t65y5Em+43E/XOV9oeLdPhoaUXfUlv8D/ADrNHts4P2j1x19GF/divXzf8sTLdcvqNzx1inq0b5zeM4mr3w6+vs5x+N17eudccN183x4W1bLibeuNHiK75zCb55YTc68Ho+26kda++P7XObp6tG+WmqeeZ4sXBsdau+D2/lmOWrffFZ13ycUmDd7dMn6TXfOf7S++Bm+eXgvB1I8UX1zRpcTffOC6idHH0+JYu+S4JfFv09Lp69maI6o9M8/ocTYb5u0tet8xcbHLLCx0pzeV3zPw/D63H8bp8NojJklp2O6+mLHWJZ6b7JQ0oaOvrAe0lIivcAv/AF8MxldRvwePnnMa9Tw4aOjp6UXaESJ8ArLSfrmL2vrhNXOfJ9mYamo2k/XDz5i9r64TVPPJyamLbzmEn65i9t64TV9ccl4tpP1w8+Yva+uMavrjkTFsJ4SeY/a+uE1TJyXg2c+En65jNU88Jqnnk5LwX8VGPEcNraEumpCUH4In78+E+I8PqcLra3D60WOppyYolIjn3D2ueS/2h+F8NxPhGr4hXJxOgHvH9aKhT9ds7eHyay04+bw7/tHyyK9E6GCH3X44f/cfhm3wTwjjvGuMOE8O0JaupJLQ2iea9A9c9zzsGnpz1Zx09OLOcmoxiWr6Z9V+w3+zOV6fiH2j0nrzafB/vn/L9fLPT/Yr7B8B9nIR1+I5OK8Rd3WlHbT9Ij0+PV9Omet1NRBXYOrW9emVkjCGlCGjpwjDSiHLGMfuh0DsHwwT5jeUXdtV/wA97wTlcZF7gK+deVb5Rr6sIDKepyRl7yrXL6vyMIEpRLSQ3VyC+vQ/CvlmeUpXKNCW2rVB1L7u2cDxf7beG8BOUNKTxOsNEdN9077vT5Z4nxL7WeJeJzdLh5OjGbRp6Sq7u19e+RXv/FvHfDPDCZxGuM0thB5l9DyzxfiX244vXJafAxNKF7Sd5ddt+2YuC+yPjniOos9B4eCW6vEKWeYFr9M9HwP2C8P0CM+N4nU4qV0wPchfybT547OngdTV4zxDiVfbcTrSdiIyX5Gd3w77G+K8UweJ9nwenKm9R5p1/hOj8Uz6FwvC8PwenHR4HQ0tDTjammVfnfd+eMvu+8Ah1W1t2v16+eNI87wH2P8ACuG5HXhqcXqO96w8tHYibb+ueh0ow0NI04aJpwqqicoAdKNtzJJlKLGVRoG6ro7Iv+vXFvkN5NN2r0Xar/10ygyYgkmkBuNrt0eu/wDliLMs5Yot3YPrXn2xpjCVLZaFtCPl6+nrlbzcxRKqKDcs8/r+GAYxAbs5uu23p19KyYqntWXvg9KXfJgfDeM+/H/44f8AQZn2zs8R4L4hrMZaegSjyRjZOPUiD38xzO+BeKC1weo15I/k5L7bnpz8HbOhLwXxSJbwOu/CN/liPhPiQb8BxP7KX8Mi7YZbRfXEzXPw/jYx97hNcrz05fwyl4XiDroap8YOaZy9qcmPLS1IfehI+MUxUTqfhhDQ6YeuCPTC5Gp6SjyyPTYrJkl91wE5nDzPngyZdM9mFdsnLgj1x8jULynn+GTaNY2LPtg1r0nNhJGJkOuVNjyuTlfXLMBk2uo08JLlghs3vmzR1Urs5i4eNi71fXNA10zjn+HHLW3Z4TjZQGDUoSElGXSQlImc7xHg46Uva8OLpSfu9WL5X3PXBpTp26Zu4fWqrduidq75yluFY+XFGms63g2jHX14xeq/IPNweKaehLXhraUeWMoBI7cxs/UpyiOsaQmm8qlNPUz0TKZTpMnpeO4/SnGHDcKVoaVgn9aXd/cZj/SToucnS16N3I6yyvtk0zp19Pi2GoMUsF36Zdo8VcbWrVPhnF9oAq7BkOLro7Zy8s3NR6fpcO9tvjHDafH6Fge2ge5Lz9M8jTFR2Ts56L9L9c5nG8OTvV0+r94/fmvDbrVdvNqWKOHjGSZ6jwI09DS4niGq0tGUvnVH4pnkISYy2z1XhWhJ4HU0tW71dNlKupELP3P0y+Sd9uvjznCuDDRhrTOaO69TbN54bwJpyZS1ObpGpH1dsd0NPRfcNzut5VOWdN/h825X4GHDcLpbxhzJ3k3/AJZqjq2AUB0DMEtTl2XZ3xTX5Wu2NbO63uqjnF8RhycVJDafvGbjiR75VxHs+IiEmpHRMs6q4dVzDrnQ4FOc+OYdXTlpyqX4Zo4WTAdSrIdnpeTObj2eLLVe2NE1vATVhXPw+pUg6sZGy/BK+ec/2lG+yZv8C1v0rV09ThTm4biE0tfSG/Z3s36XuPwzk8UENacCVkZIPnTmJNdPF5d3K2vTcPx/6VwWnKUr1NENOa9U35X8E+Rh/SfXOB4dxRocPxcZIc8Y1b3JD+V4Y8WykA7uebyY3l09309/8913XiwaN3yM8v4/x6+ISvoRAPlmyfEmnFlKYIWW1nnvGNTT1Zw1NOZJ6SrO+Hik9vLlnl5bq+i63FibO+YZyZN3ijh652mMi44zEBw2mEgvTAiZrprpYOOOUDWWRbzNjFixlgVcW7yGRNaOYa2yRLy2MLclrNrPIXKF3zpT0qjVZg1IMZpmsbK3hlKENWUGxc0R4ydAuZMOW4ytXGV1NDjGy3PVfZXjq4jU01onBQvazf8AK88NovvZ6L7PTYcVz3tGEl+ifvzzebGTFzwx4+Wae9/STzw/pPrnAOOPPD+mn9rPDuvuTB6A4k88JxJ55wDjjzw/pp55N04O/wDpJ54f0n1zgfpp5/jhONPP8cbq8HfOJPPD+kmcH9N/5sP6aeeTdXg7xxOE4k884P6af2sJxvrk3VmDvfpHrjHEeucE4088P6ad5Ud1emN2rcJJuu9+knnWcj7YSdX7N8bAa9wfiEh/dnO4rxGWumhoXyLuhvN/h6Z6PwH7KvFaRqeMRTRmV+jqjIf7VdD0657PF9PluZV83yfVzK3HGdPnv2R+xniH2j146lS4fgDafESjs+kR6v4Z9s8C8F8P+z3BHDeG6JCLTOaXKb5r1fyO2aNOGnw2jDh9CENLTgBCEQADsBnN8V+0Ph3hXM8XxMYzD7kW5PoB8t897z7dp1DldrSrMycdx/D8FpOtxWvpaUA3dRBa7G/rnhNb7V+MeK3o/Z7w/UIGzrzjb8bdh+K5Xo/YnjvEdU1/H/FZczuw03mkHct2PkOQa/Gf9ovC6PPpeGcO60jY1Z+7H5HVzzafan7VS5iGvLQk7L/R6Yei1fytz3vhn2a8G8NlF4XhD2jdamt78tjrbYfIM6kprQxIyDYWx+mO03HifCPsFp8Jrw4jxTi/bEX/AHWiUParS2vQM9RwHh3h3hIy4DhNPRml8yXOT3uTv2881ToiUjZYJ1r08rcSaQbC3tSVdHU+VZVPLU5oajJY2CIbD8soSBJiSqDFNjdt73d/98bV3K5kZNXJ6Pr59KyuUpGoktnrLa93ajyrCKj3ZS5C+UBd97/fsdfPG1wEUGRug3Z23OhvkX2UY8kq2dxFPWzEmnTmpB2i7Ni9MALPTLa5QB8k9NsEdiJe6CrtZ8Ha2/wcjKqIe4JvsbtOz6YRqW4MkHdP3fLARle89oC2MuvXpjcsIvOybDYk7136euLMsIxN1Tptt3r55J2Dat2FtA0X+WETm/rF6ZWyBtv/AK+uTEnKlFpoN9vh1+GTA8PwvE6MdCMXW0xpaZF0tn4ZacVonTWg/wD3GU8NGDpQuEFB3Yi9X0yzk0h20tK3dfZx/hmHX4Ma2k7mpD/8jGjrad7Ti/8A3GJ7PSU5tHS26f0cf4YJaOgv+40P2cf4YFzqx/tx+uE1fKf0llPstGqNDRK8tOP8Mbl0yPK6WlSJXId/lgXR15iMdWVjtUsbV1ZasY+0nbv1+WZYaOlCQ6elCL0uMQcbW09LVIe0hGSDS9TCdbWMdNAYRQ8wcT2Wku+jpPbfTi/uyr9G4Y39kX/if45Dh+Hi7aR85S/jjtdLJcNwy28Lw6+ulF/dlc+A4Ke0uD4euu2lE/Iw+w0H/wBv6Tkfvyfo2gdIS/aT/jjs6VS8K8Ol14LQ+Ua/LA+D+GJTwOl8bkfk5c6Oi/1JHw1Jn78nsNF6Ood9tWX8cbp0z/qPwv8AucP/AM5/xxf1B4XJs4UPhqS/jmo0NOk5tS//AJJfxyewiG2rrHwn/ljs6Y//AA54Y3/RTPhqP78SX2Y8NlVGuPpqH7zOg6If+9r3/jP4YxCJR7TVfXnP4Y3Tpyv/AAp4c9J8T/8AnF//ANcR+yXBm8dfX+bF/dnZNLf/AH2sf/cfwycpde216/xR/hjdNRxX7J8N24rW+cRyP2R0H7vG6g+umP787DCfbX1T48r+7JGGqP8A6maeTGP8MdjDw/2f0tDSlpy4lmSku+mHl65VqfZvTlbpcVyp0JQafnedecZIcurMfNB/dhgSBJTV86CvlmeMt2xcJvbhx+zeqbHFaZ8YuXHgOvGq4jSr1JH7s7ANj7SVd/dMer6akj4xH9+S4ynCOPLwTV1NOWnPV0USrFsez0zmT+zXHxk8stGReyTT8zPUxjMf99//AM/88s5ZV/vd6/4f+eXGTH0fbjyR9nfEh2NN3/4hjngPiBu6UL9NSP8AHPUBO/8AexT/AAf54B4h6S0n/wC1P35rtPt4vI8X4N4tZGHDMom6k4tv1zK+D+LH/wBFqvwp/Jz3DLiTo6VdN7MY1OIH/wBl+C/wydOmM4zUeDfC/FT/AOh1/lBcU4DxM2eB4oP/AIpfwz35PW5SjT5u5bX1rDB1ec5uS6aCT5nXbEMu52+avD6mlxpDX05acrFjKNP0c9jLR1NHU4uUNKfKaMuRIrty7VnG+0/MePXML5I/dVPxDPX+Ha09Xw7h5jFeQi2o2beT6ZnLuumM1468TM1pHvac435xTKpEo9Yp8TPoZqa3eMb9Jv8ADC6upaOnFDvzf5Zt5ftPm00k+80VTl3A8PwmtqkdfiNTTitc0YEvwsz3urrwjtPh4SvvcUzJq68HTeXg9OIXuQi0eeZu9dH2rp53xX7Pz4LgYeIcLxOnxfBylySnGLGUJdiUXpfzM4l59F+xrp8bHxLg9SEJx1Yc8NKQIo2bO19M0vAcHKKS8N0a8uSGZ8edu5Uxx5Tb5ZxT7sb83NPCQJ8Hrx78lnypz33iXhPAS4LWkeGwJx05csgiU007OeF8IeXWiSLitI9E75rK9PV4Me9KfDuP1uA1jV4XVdOZ5Oz8c6kPEuE4nmeO0ZaU5b+10el+bF2+lZt4zhfCuatHw5g1u80qX03zzXiPJp8VKGjBhGNCKu9eua9+mLJ6sbtScZKaHEQlH1uK/Ur8cz6nFT0bqRz1tW9ZhjKnZcE5L1bxwm9ky1jqDPUnqSuUmT5rjaMWepHT3Reg4hZFfPbO59kPCtPxbjdWGvqaunDT0+bm0423ew7O2aYvpwpHLJHqYYmei1/s8S4zWNOc3SJpGUjeR51WWH2biRWOpPmDolb5zvkxcb5sfTg6MObJxGixZUbdTOnLgNTh58s40nT1zu+H/ZTV47gY8TPidLh2b7hOK3Hou3TfJMt1nHPll08LeEazo+O+Ea3g/GuhqyjqRd4akPuyM5mdndaSvCOVXhHJYljTBLzVo0pmCMqzVoz6ZjKOWcataC6aR6+uYHh9ae/J0zezGIXiz1iJRmMbY545WOVOLGVJi1ne4Lwg40NWaxiy6d09M6H/AIc4Z3j7T4Xea+7J7dPv4zqvLaQ2Z2vC5MdQLokMV+WadXwCUP8AcQZvVHZMr0uE1NLXjDUixeYNzMZ5Y5TTN8stlip49F39OuQ4/wBc4mrqstSSbCqGL7RyfYj6s+prvfp7/aw/rB/tfjnA9o+eH2rj+PF/ku/+sHzw/rB8/wAc8/7WWT2rk/jxf5T0J4h64TxD1/HPPe2lkNZ88n8eL/KeiPEfXCeI+ued9s+eT20sfxov8qPSfrH1zTwE+K8Q4g4fgtKWtqyEIhsHS17BfVzmfZ3wPjfG9UYPseFi+/xEz3T0D+s+hn1bwfw7T8I4Q0PB+EIykBPieIsZvmnV+Gxln00lZ8n1W8dLfs79nNDwrTjxHFsNTigFk/d0/hff1zTxn2m4bSnLR4KGpxvEDXs+HjzB8XoZVqeGHEvN4nxOrxR/wj3NMf8ACdfmub9CGloQNPQ0o6emFEYxA/Az0ya9PBJI4PEaP2j8Y5vb6+n4Zw126em8+olV16Hc6mX8H9lvCeF5Zy0ZcTr3bq67zWhu10/POtOQkuZpLNutPTbK5SGNkUDoje3+r+eXSryPsyEYRIxAqMAAAf44ZajKIQFGy66OzvmfmIyu1Lvdq02OuJ7eCc8pg7tEqrz3X0wjdz1I2N7F2vt9d8qnqRSVLYfdbrbyzPLiNHlf/MaQsrVkXVvr8MqeP4Im83FaQhSymb/R2wNAkrix5UWrNuhRT6ZB5a5SxGuW6+Lv6uYdfxbgIxa4zQFKAmNfjt3yt8b8Mgi8do1QJzDXn0wNkkly3aRd7O9bb/LG1PejzArdGx0O9Hq5yZeP+FBTxUFALvqfLyyqX2k8KBrikB2AVTbq18cDryjIkEbkV1YhRv0dsSWoGmOkHXai1aPrnGl9qPCozZGtOVt0Rd/9b5TL7V+Gbq6qre0X4db2wj0N3RVEjrY7tdPRXK2ZKT7zcfMoU2oHPOy+1vh4NGsr0s6fj88r/wDGHBj/ALmb6KV8Ou2B6VWe1MQfda2ujt3wXyAjsqRTu/DPLz+2fDNhoS6UPMCYkftlpxPc4cfjM/10ybg9RJJoEZPw3/10fpkzyT9sen/loL/irJjY5+l4TxWrpxnHxLU0wKTka22Xr3S/ngPB+MWnxSYu1cu6+XXNfD6uoQhA5rBF7Iu78dnNUp6W7coiF0F+nb45eMLe3K/VHE2L4rrI9Kgr0vpfT1yyXgfFqB4rq2uxy79Cl32G9s1S1mqj13SmlP8AvjynIOs1stK8t9/jeOETdc88F4u6fFNU3f6r28t7ep9cj4PxACeLatUW8qUvbrm81aCMpF0m/Z2d7+GGOqRGLOJD7xuVfmPfHGLusZ4NrkYv631qSyoXT5Xfli/qjiRebxXWqlHlN6+ebp68YxkEywpZInl+/wD12SOvp0wJRtkO0iqDrjjDbNHwfiJT5TxTXELbgFdPXf8AyyT8G4gofFNZW690B3819c1e2hLlDUjbSPMUfXe7u/jglxWkLza0WR0qq/y7Y4xN1lj4Nrpf601x7nKefxxpeC60ZyJeLa1Bd0bfjl5xWnEObWhIG6Zhb+5/18Zp8boNPtoojZzG69qvyxxhus36p1RY/rTiSVFDGt35/H6YXwbWj18V19g2Im1+e+Xw4/RVvWjW+71Kqnf+OCPG8NbOWvFbELVb866f544w3+1R4NrikvFdaKlhQ23332xJ+E68JBPxTWBBErp677dc0PGcOXeoMrR5La79EyPHaTKCSsqnZp232DpeOM/Bv9qjwbXZsTxXXELFjQ/j03xZeE8RGr8U11l0927+f0zUcbpgLqajKl2Fu6b6dMR47hySc0qrejrt2vHGLv8Aan9UcRVvievugADf+tsMvCNaNJ4rrVYPu9Mc43TYozbFAGlK+O29Y0OL0+WUZb1SDOKLv6nn5Y4w3+1UvCdcIr4rrVJAWJv8v9dTI+E68LXxTWKaVD8DLocbGUI3tKkCzfpuK7OD9JedNgoRZC7d7v1xxhv9qv1ZxFb+K6y3vsAHngPDtZgyPE+JJDW8AF8j57ZdPi4shJRi7rc4ioPXfz/PJLxDRrldWIDYMhDrv08/LHGJv9lj4RxLEk+KcQbW+6WFeXneCPhmuoPinELdOweXx88n6fointtMil7qpRtkj4poxKdSNq3du3pt6B8scYb/AGkfDeIVI+I8Ttd9L+lZYeGarpjLxXiGVggFb9KazP8ArXShXv3W900vU/E/LJ+tNBEJSqroHr1PzccYb/a39Xawsf1lxQ2hYdfLp1wafA6rf/8AKcQ1JAAt+plL4vpJfvyQoKqvnfe8rl4xB0yJCd9Uqgryby8YbrdHw7VbZeJ8SbiHu9PiFXgPD9WMjm8V1w9OWzp6fHOZreJGpHlk6sVRWNW7P8XKf0q+uprbVuIfHtnLLHPf9Xbx3xa/vt2YeH6z18V4j1oNvwxdTgeJjZDxLiFLBeU/dnI0+LlpjU9Vk9yZSfCsMvENViVKYg22b/hmLj5XeZfTfOx4/gNSOp7Xitb2k6oko2Hbtnf8F4ePF+Ea+jp8TOOrBJxNNCUfPrs3nkuJP0ibLVVnVXZt8M1eGcXqeGa/ttFWZBi8zY2d6yTxZS7q5fUeO48Y7sOF1kK8T4q1KPdNut2ldPXI8DrsgfEOJbaaY7b96PXOQ+L8W/d5POqUvz3e14p4rxcUScNnex32rz+eeji8W3WfDm0/WPEeg8pfpddemU63C6WmkdTj+IH+sMo2HwDbOW+I8Y8oT0+UNrjfat98yajra2vPWnq+9Nto26Vmcseumsbjb/a9O7wMeG4DiI6/DcdxcJxXlYpdeu2aDX19fUk6XHca7t0Rav1rPNyNQ2dTv5Zo4fidbRAjqSAvvQ/LOPHOdx3x/jx2+J0vENXSlCHF69SEfaSjVOyNF9M5B4a8Nrx0xiyXzDG/WXEIDIvMvEavEa0yRrMU8izM3x+S+3aeb6fD07OvwN6Zqz1NQA39kjXrSZzHwvwvWnOetrcSzk9Rj+O2GPHcQESUr5RKrbMLpSt/pJZvDHyYseTyeDK7bjwPwhQOJ4jf1BPwy6H2X8OnScVrU97Pw2zmeyn1NWXwyzm1iJE19QBsBoX651x577cM749f1dKf2Z4FjRq8RVXzWbPqVlnC/o/gJqcNp60w1alKUwCVHQaPPpffOVetVvETd9/eX9+LIlOzU1ZTPKTZfwc1ljuacMv7TTtfreBVOmnnzmGXjnDReXnhKT0Bvf45wo6MLDlg/wD2mH2US7hDbfaIZx+xHCeGOrxPHcNxWm8rHnO3Mdc9HHiuK0OF4aOlxjCBpQIxiRaat6jvvniSEWRUY312DHZyes5X6yc1j4tVvDDhenp+OZeJaMuH4/ifbRUqLGAnwSNib7meb477LRjcuD1w7cmqjv8AE/hlaLs7t7b9MBC62fj5Z1kjrycfi/D+J4R/ptNI9pDY/MzKGejOFZX/AESnSyN5HgKLeG2rvCsaOTz4Zfpwm/djKVdaFzu6fhspbGjEXotH55fpeEajIJQhBWi97+mZuKXtwOTXsI6WorsXFLy+Ph3F8pq60OTSG5SZGx8LvO4eDRl/Wgbg+7vjnhGmlOpunRidPq+eOETU0XhvEeHhpkNLluJXLZmrT8U6Xp/RyiPgXCO/Lv5NF/hl/wCquD5Tm05MexzKPxrOV8ErjfB30sl4xw8NtScYPkpvk4fX4DxTiv0XV1I3yrZIFrqC7Wl5THwngLL0NOqQQXf4XvmrS4Pg9BZaenpwlVKFNfK3J9iRrHwyVhPsz4VQ3qt3Vzr92N/4Z8LdyM/g6jvnRQY3VlfL8sGmyIbyLuqEQL/hno6d3OPsz4ZOIkdWO/TnvD/4Y8L5qDVo6+/nSkXbzLHYpvZ6nTp3xZalPKqD0Qu9sdG65r9l/DB2dX4M/wDLI/ZbwyrJar3Qn0PpnTsVCSyDe3d6bl4T3ZDH73V2u8aNuSfZbw2V1LiKO/MU/hjS+y3hvM1PX9TmNvwzqs247WL23r1fxxFmjRsF9Tpg253/AIT8NLHU4jbq85X5YP8Awr4aVc9av8Zv+GdLmnENxHrbub/PIz5xBb2ul8sG27gdXW4DhdLhuD4mUNPTjyw92K/G664uvxPimpIP1vrxK6R04X8TbrmUlQV2bbfwMOpq1y8sm1o3q8mtgc3jE4gePa0WaknkKg9kqrvpvWVkPG4asdF8b1dU1CV6qsCDW1nV79MtJUcr1ELXpjDKI8r0aurrJr9jna3hH2kkTf19pyOw8RK38M53E/rbQZcNqcZqS1jSXmjqqXd7Pwz0RNVSVxKH45JJT0kS6iXt/niSp28PPU8XCp6+u1Z/vL/flEp8e9dTVf8A7nPcanDaEzfS01eu1fkZQ+G8FKggCjW6H45P7G8niX9Nes9b/wDJxWPFvV1fq57CXhPDyrlnqRHYGkvt2xNXwRjEY6wWbc0av4UuTeX4Tlk8npx4r2kb9p942tzu+LQlDiUi8pQlbbV6ZdPwjiIqxlpyCm+avzy7xThNfU1yelpMosS67Oaxtvs5WuJ4xDVf0WWnzU6JaXui5zfZ8R5an456PjtDVjw/DDpz5iKJyu2+c9sWxv1MzlnZfSc7Phy/Za/9meB0tb+xP6OdRlfbJZeZ+5fwfcv4cv2Or/Yl9MnsdX+xL6Z1ObAyrH3L+D7lcv2UzrFv4Y0YSCmL9M6C27g4qHasv3DnWPkl5OTNgD1DJj7n6OTpy1tQIhOX3I7W7WC4prahVasg8iTlc193/BH/AKTBY9dk63nZq+1jqzk7zlfquT2k0pk15W75UO/lv88N7ej+GEPzSe7fcvcwE26Frvviu1NPXJVbgU+vTAeT13fTFtHvfrimz0PTJd7UXhFg9r3yC3QtVviX5/XBe5XTAYrfvhF73fxxb3Nysg1ttu4UWzz+Dhvrf54i2jdVkruN+eDRlq6XBYtX6b7ZFvpgjsb4Q41ve/bAr9TB137H4ZDqvpthdCPZ7emG9mrTvWKX3+mSSBu0PbCH5prYvzXAqm6PreJ1Lt373hNujgTo4w07dfTFHpv9ckpW7XQ9LwGvq3a7fDDTYtV53ib2XVPTyyDV+XxwuhbresJK9h6+uB7Vuh5ZEOqUXhBbpraiqwCNC1WS7i339MBY9L9MBk6W75O6dPnk3Xfs9FvANLT8QwujdSir6bZIxk1Rdm3r2xtPWlDcqzcUvy2yx4rVZ28onYNvPp83BSGjqMeYg16j3xzhNeTUdOV9HpjQ8R1o+77tdhF/Nxv0/WnZJjHlNqPrffB0U4LXsHT6l9f9emNLgtaILGNVvTdemD9N16VIeVcvT5uN+l8TLpCPXtG3pg0aHh03l5kjF3eqg9PreE8OmSakbdbQra2t8X2vEoMYNb78vXH9rxUh5txHqdNu31wdJHgYymwlqcqnurHZ/HDDw1laSXYfd3aunJpy4l2nPcTeXVPKzNQ8oTlqEJSUIgg+pv6P4YNM/wCrYgPtL5izZ+vwwnAaXKs5yAdiqXbNfONcsuUj96lOl/h/HDOc9WPLqJvQMZb01ag74XUYTgeHZfelypZRbt1Msj4foc3vsyK7Km3o+uaZRk0UnKIWUfF+GVx1qVnF5TcGLs7/ACcJokOA0G4235j5P4bVjHh+nuxg1aXzb7Hl5dMmhqQlKmRRsb7b231/DHZRYylF3UREo6O998KplwGgskJRQUF8vPLDgNCRRD3qECTfbzwT5gZkpCrd1v5fnjw1IzlLTajR7yUW+n4dLwdFOD4eLc9Ky6Ut28+uE4TQOU5a5pIqda7emSEyTMJR2tuQqh2rGjr1dgxhdC9+/wAfpgK6OhHppw5W1sGk60/THjDSaXRiAgoFf59sXmGMmHNE3slErd6D9cMZ88riohYqn8b7YDaUIu8JQOW90BPV+uPMW5UWbNGzVLiE+aaIkhbeXYDZsq62yGrQVqR7g2l74U3MsSdN9UUAL6b40ZM5JzNlSobrfp0yjmH3uW76o3Zf55JIq0RilUAfP/X78IvpRalslJJPRfLpkZARYykot3ug+uV1qcpKJKi7RsXr2yRlKNE4vMDbSHXfer/04VY+/Et5SRZym6VvW+SE+VspDZTrS7ZRyiJGTFNlez161jxnOMZS54yCwWrHavL/AEYFsdURfaROt7U15euIat3E96ili7Hx2/DFXUVWEu33ZRT02vbvgUBlKEotCVGx6+XxrAvkkpFLY7oG3+eVOoxseel7CtfF7GLzQTnp33FG0fPyqshKxGQGxQF19fjhFpqahzNNAVQ9Hv8ADF50AFRq1Ona/P8AHK4OmUshdxtF+X44AjCNkaegpt17pgXx1I+9FlQdTl6+n5YXVQLihXWrPS8pkyKXnBd1FB/7YsJmnORLeCdQbN6OmFaCezc9n+sFieW+AnOO7vXUX69EyldKVTJPSqpoX1+Xrh5osWp7oUXX1vrhF8NSKFvIOyBufLbtiTn/AEgRkq9Avf54rrQJDt7uyyQtrd2PTIpOJvC1OsjfffbIpy5KzaiVaN4rOgupdeZq/wAsWUtjeMhEalfffricxGIGm7Aipu+teWVDs1KjYO99uh38u+PzSiHNu3u1X41lXNpo07rtUdny6+l4Risa5ateZNxwLTUZI3Ru0XufCshNqL71W7ux/nlcZkI/eidTmIn1waupONA2r1opKwq2c7kAMSwrl6fhk5lrljsm1Cpv69sr5yQ1GqKLOp674I2sQnV9Sj4fHAsuSvNSX1TdPRx+ZkcgG2yeT23xOZRoEN2rT/LpiEph99umhlQ798C0rnJRlWyketV88jKbfWjrW2/1zOzmxkpJjdKJR8cMG5KG1Nql3fbt2wL+aqELQlsUde99sbUnOjm6G6RQ+XV7ZSMlZEaovoICX8sEjaUmXQKaoTuejkF0plN9XZF3P9GVsoSixYRkSUL32+Zim4EXc3Rlu9mtr8skpT2uextRLZ/HAR4XgpWy0YUJ0KfqVlEvCuDm1GPIt7E981DGKCxSwakqbdKb+uCOo0l7G8bW+p8snGJqMGp4Joy+5qakTfrT8Mol4DqlEdaO/mbnldZ1mpSgy91WtzYqvrj6UyS0w5i2+WlPjk4RNRwNTwfi4KHJKu5LM8+A4qLvoy+VOepkvIEoUdbJB1+Hz2xGUgAkyaKbO5v1MnCFxjyktDWjs6OofGLkz1UCAsoyV6LLv+GTJ9uJxed1NmKm3JHe/wDlMUW+yZbPSlIikbGEQfkGB0tSMiPInl3zqvySx+uBLf3u2WGnMpYu/klYxw2o7gA3Ze+CKbrz6dbySaiFb9rzRHhZcoyYltCvc88f9C1WQIbVv2x/oydOv/fJXknyM2PBT5uVlFRpLs/DBqcKwWCkpkqodvrgZQum9r6+uGuu/TNv6DUCTPkqrHtb55X+jRinPYV1v8fhjZpl3It7l7bZLpBN02zUcLEqUElFa2l09X03y2HAxWlea+jRt5m/wwaYLvpW+RG2/wA86P6NoReWWnLmNxEt/Ewa/DaMdWJGXV3ELHvW+DTn8otMi++EK69PPOhLhoRiOkWuzGr+e/Tf1wGnCMk1NOEwGt66dTZ3wMC27bnfICl7fXfOn7KCQlEhCK7kpht5VR2ctkacpEYnUdouweZu4XTjVu3v8clKdHy6Z1PYqMYJdL96/rv+eGZpugAwjK6auz4nq4NVy4acmWw7m1b/AJYeSW6Rqi86mkQgxkz5XcWKrSeR8cslDljZJpu5BsD2R73g05Lpyi8rCVPWxMJoaqpGEt9r/hnUj7NCRqrKVjSN9rf9d8PMQiUakkKNxo8x32wfDlHD6vT2cr9dvTD+jawlQv450PZM580pzC7pjVHldb/HGhragnKxkDtZTF+HpgYI8PNUY8vmuwHneL7CSIoI90s+XXOvGenBI6urUbQEbV7L+/IewANmTLZktO3mnS8DlT4TVIEpUGxtIbdq7/DHOB1Fbew33dvXOlE4dizlBja7Enbr8euVVpmsRJakBK7I32fng1piOCYpzSQerV0/Jx3grLjLnLsaS/4Z0tHQjyozuTVgtFd06XmfU0+RjyylE5kN9m93q/l54h8M+pwWlDlJcxY0tVfntjz4LT0pXU5RQVF3s7ZoNGTEjyc+nIAQ7X1S7enXHjCMY+yCUbdlj08q3xskZ/0PSNGM9XTlFaVLKLrv8sLw+nCH9EbUtse9V1zTPS1YwG4STqKlnfttlPs5MQpWQlc5vZvfmY2aQhCMeaUg5S0Ap6b3jQ1ZMGkZB/WjVu+1/neM6SWS05NraHR8nK9TS9oIxZJKmMaUv0+GDs0uZgRa5F6oIvlt3+GPOMGMQejVSNz1Ntu/0yiWg6aQhK7BuQKevX1MMCcBVeZXlSws7jT/AK75NEWryTWEoEatBpU9Tu+TgZylNIapPl3Yq2bdtsqJasY884xt2WygE3qi/jhiMZRlp6cWStyEaL3X+GXQvYjEuGki+8i3+d4jGNiQgkRQBvF1W+WP9HzD/WOp53XQ/dhjo6kZKR0Xmasbva+jdZFSM5ElNMA2dkuu+23fvklOJcZicz1Wr61s4PaSol7KPvbyIyLuqpNmsLpai+9po3YgbfK9jyyomkxjFiakoq0t7em1WdcMJ6s75NXn5Xa5gl9duv8A2yshq6MfaaRcerEirV9OuWsJISr2apQibd6byUgsZ0jEi2J7wpv3T6YElGfMEWVbe8O3mA/ng98ie8IUILv6Yk5kZEmNcuzW6fJ/jlhTuppmkkocqmyTRvp1v4bYmoSCxartqK015/E88C82oLJBOnLdbfCu+QFXm54S/qyVb27FfngWGqdTmUspqy+45Ai2R1Im9jM2evYxdKUxlF1Lp6Vad6T548nVZAHKoWcvXbp0yKCwoIoS2LR7rVPwcC8vus2zpUWxvJqsi2cY1fvMRE+NFXgjqxAiygK1HmGg8nyyoMyVRYzbRaII1vteKaU2Q8pI6pyAnzrc2yGnDkt1Yldyy8GijN5tYpdnom3rg+Ty1IwkFcqmxzJ8WrMmo6cplSoBaVN7274ZBKPN7SkdrpXeqHYrKiRHVYf0fMu0mIlfLq4PS+MaiBKDNKsnQ77PXFiSJPPIRFXntL+uCOp7v9JF3U2Td+NFGCSTUlpykDQx3Ng2o2+d4Dy05FcunLlXewv1wSaQYa4AogNddkKrpicmnzxvTlsAlJT5dMs5JxF9hqSZO3LJGvjWQ0jKUWyWrXX3t0fr0enfFjLVU5rkBuxG03+aYDnVhLTmI0hqUvpT3wyhqkb9jOtrtG/X4fxwoymxq9HlG+Xan41ZkoZDLTChLJVffcvK+aMpDPnJBe8q+n1xycJUKsg6A9PXKgs9OCUq1urt531fTpkhI5ZrqXFbVsRcSOpHVKPaC+USn06Y4ygkCVpvK9OVC/8AbAESUhYpTJA5tw+fpg09acpENR5eUW7uuvRyM4yFYxi2c1RkO3zyMoezOWEZl9QbTAcsuR0ssSl3740ljAGBIrZ5d39+Vhpu1gdL9HtVGAjphIZF30oquyX64FkK5IydIoqNlh9B67mOc1S2OUsEsa+v+ryo0ZQ5UqQdYqJVd3DyagRPYxKaEbPorgGyJs7hupdHb4vxxWUZKSmCopRZ/C9sgakVWNIK8ql32w88tWvflF7A2nxKyG0CC7Su2x29PTp/DDyzJbrL4xtE+X+qxFlG/wCm5XojEH61hfuvLxJa0A/5ZVNEluOlJpst6b/D/VYKFWVCCr38/L5YrKY8pxEYlEbJO/x/HJGWpEiOoJ0Tr+Z64QaJyIkuQSxoVMOoH/Fip0UP4dN8Xn4fnGYEjaxHrs1t65NKXOrzlDW0iyj0/PAs/ou+qKm5sF3u9MSBfvRRjt1Tb/V4GV81SAd/eTftveQIo8vKq1cUa28v34U7YLVstqJFb/u/hkjvL3Z1W6LFdvT/AF0xBhCDOfnSH07P7sEZaJI2sehS7efXAfcb9pKMm6vltbwkOV5vainSuqfL/W2IorWnUihTTQ+e9GQ2KIygCdBSvm/6vAiw5wk8x0FKoro7/DDzaXKtCD2Ev44GMoT5y0D1V6bdfw9MLqyWIkKvdVHzCn88IYndBowQCznPjfS8k7bOQtoLkdO7YYNSQTVgU7hHdt88Go6caZQ5W7vlbo8sKPNyCmmgUIJ16bYfalFDRXRFG/K/+2Vw1IEV55RW7bp/L/PGhOEQI61AuzK9nq9MBvaakoXy9d6Cv35MWKMkjrLXkOTIac/TeQjcimEbEvsZGTKazUBLDavgGZ5pULiyWEdg9DJ7RVlzcrW4Xv8AXKy6HttGMYoSkbbyN177fTF0Y6M3UkJENyMir+ANeWZeeRe4NeXRTBOa6YLHstDf8MKu5Ix1OWZIF2diivXpWXcsSJGGtKe1ggojmI1V1EmHK7egOSMtwikQWqaPj33xs02wIxr2pKK0ox6qPk4ZahfLDSm81VIbt80cwx1Fajq22grvXleQnLfloV3t/wAsDoTjqyiQjoSdt7gCN+fbG0pAydTSmbFko8wN/ADOfHV1Vtj97py7H51lrqrpRi9tqGn/ADyHbVL2GnSaUooFSIoXv3s2xtScGEgikXdL6r183qmYZznYinWzq/WsDq6nKMNVSRvu7fhWJC1q1NODF5ZRgRaRUkvaisfUiyd9GLMAAkfWjvmKE4kLlpxWWzs3XneWHEtCu4VYux87/PKjbpx5fc1+HvfZtpEduuVk9KNy1Iq3QRbH5X8d8ynGahHaTyptSlfx/wA8Y4rmYw1DdKvone28aXbVLUg3CUOWMv6zGzb8nK+aOlqk9KekggRLBPND8nFOLjCNsGUxWPLKr+JVVg0OK05b62lHmN7Cz1wfJ9aiKuvCKnSJsPlfboYxougRlzQEoFbu/jti6kuDlUpaMru1Nh/F2wROHjFkacmyhUfz3NsbNVY6pKbF1YRmAVWzZ3ox9WerGDKRpUILs12KBzHqT0/aGpBIp2JFHn3x9HViJU6Ou+pV/Ch3yaNrh0+JQnGMYxCtSkBd2js4+jPQkzhCTqxiC0WL5fXKtJJrWoAjYS3T12xtOOnJZaZzm27IKL8k6ZaBr6QahOGpygWxkID82sjJNWhhKEi25nU7gN/vyyUibyke9VE/LfphlKMeXl0ooNLKJt5bXjZpVrTlGMQIxTdGZQ777+fTFhLTCLOAg0kVRfSnzfLLpGtzXBSNIsEd67GJGDHSqOhzG4qVJey79/TBpCcZDy6TzCgWnMd+ps4OJdGUnn2YlseVEDbobdsU0tSEGTAkIhFikonn/pyiU5Rs19Ka3Yra+ndr0xpPhdpz056kCcQjvtSKU7WFvxvLNV0gly6TylUrv9avKjV9iWw1UlvQbdumxlzLT14+5YCq9EPPCz0bTjpRSWkS5U2Wk+ey9bw6mlo2OnLmeoygA7Xtsb5VF5oqyhcdjsp88sjHW2dF0uSIlbK7fjkBlp6UKkyKU+9RT8+2xlWpoRNTmjqaZCJ15gV7nXp8Ms1DWSpaETldmLSPptiak2ESOvGRFUbiLXxPTvibW6U61dubT6qxko+Tfz7Y+jNiEo8bL3Sokor5+uPKEoH/AJXViwSwUR7obP4YI6UphZyotbHXq27ZU+VnvTgEpmom1Megm5YuLFtY/fDYSzfr3Nt8aGnCN+1lpylT3APq9f45VXEESOhqabARoS6u906n446D6UZCsSUotCWqL510xuWVyI8wtLEmb+dDlc5MNWS6UdObuyhJ3yPE6M9OJqpZVVFvbve+DaRnM1mHLqgOxYLt33yQjLnbjrRptrdfR33xpauib88Zbm6l/RyvmganOqoKcrd+ieeBVN04zJTNWOoHKPKgHq7+uaI8ToUGprTAAHlNn0psMkNXSYstKFS6MXZTvs4Z6unOIa3DalBZJj1Pq77YJ+TkNLnvS133vvBE3Phf45W2POakgN29No+jlWm6WlL+idRklkao9Ex56+kMZ63PG2pHsxr4K3eTQEtWNTWU0Qdjb4itn4ZZB0UP6TVl2FbL23/PEJaCLHlUQRhe/m1eT2mmQWfD6ZHtKMi/j55Rcmg0R1OvdkhvvdOB0IS2Z8wNrZv27mUE9DmUqtrpXazenHhqjppHVuERK5KfPazbB0jEJsIDLlaakUnnVdTIx9mM/ZyGL96MkPyw1prEuq3ixgH1rBqQ1bOTWkAoRlCr+tGDtZo61ReaEzrzIm513s/fkhq6WrKRyaiUfdS7ut9v34o8RpSod093llI8vIrKZa0pa1a0mMh6qX8bTfJoaoumFaehrsl95qqa8zbK4c3OSdPUUutxfxDBLUHrrUxOpI6PofG8rJzgBDiYSgKc3MlX6BhTyNWMrdPVRekgd3IzCiUdSBQtwFT5bVkjzTkyNfmBdyZIvt1pcbVZsOaGpN/q1IFXqdN8qKZw9pI0xvTqzcjvXzx4ac4xlEIzALBio7nzwak4DF1dIgSN0jsfKnBLQjpJqwncPJGzvZVb7YGiEI8lMdeKNJy3d71teVmjKO8Oblj5jt+GPoSjqwb1owlFaKkP4vwySnUjk14MnqIget3hS8uoS5oa0hRej16UfTBA1otR4pJRdxtEq/Lrlhry05x5+RvvHUTb0XasPtdCKNoFiEx/74TojrapC5ahJdm4gO/nXpiw1pKk4odKiBe3lls3TqtOew7spB8jbpeR0ZSirrx3UOWQvw9cm10BKcpKwk191YKldcaTXvGpq81lpEKenT4H44nstWLbqy3KLiIHrS4kdMAvVSXw5a+e2A+myLvVW7WtON3164VtVlaO3LpiiuVujqRXl4hu72i39T5YWGpMs1ySHvCUl/E3+fllQNSFymkUdlEBs8lw0HvagDslwForyckPagM2HL6SY/RusjrsX7sEdkjMdvLcyHQEUlHlhpytEuFJ33pMWZqtyNCKdQt3Xaqfl+GSGvp2iShXUSO/4b/XGhxeipCUyHxKv8PlgCXteXlYEUG/dbs+Gy4I61rcIMlVsRKL22y91dEi8mrFHepbUejeJqsZbxnFe4THbbfrl2F5op72npRiqMrd/TpeEjpohDSUBtEBfkY3ubjONhdRkAnw88qhLTgyGVb7UmBeGlyKaOixQupJ8t/liRjGOxpxidWpCVfrvjw1YMSpRiDfvCD+ZtiaetCU6YRU2eVBSrXpkFk+TkLKltRQJ37YsZC1KM7225Usfgvn5Y3NpsZSSYFWDHd9ByEyr9o8sbic0I218KwqtAa1NOa3VkXeuvrjR1NKJywlGBdsnT3K/wBfDCBKXtGOmlUc0WJXnf8ArpkZaQ+7pRFLuMmk6+e2E0EfZSI7dBUF8uv44vtIkvdkK0B1T0b7X547702yFm5Ivc+vpkkSlEqmLspLc361eFC9RNoRVKrlN3ysTEjORJrS07BUuqfk31wwjGIylqBEa22V+h54syBTp6s1ZbVT+/ffKHlq0nPpoxREk7t9dn1O2SWtpo83OXbVqo/HFmpcHV6m/PFG/Ky7wS1fZqurSiAb7nTtgWLEaNWIR35t7/LF9uxp0+Jk22IbHXzNsWbLaTKQuxY7HntHDzzAXVOXcSYh186yaQOeU6vW+7e/Md/QMs046gtz020F5ld/htu4sZLpkD2DIPeSkrb02cSXNKAnIVuRKdvjf4ZRZye9yhBruH8TJlCDNGEbraoj+TkwOepyxCMlYRbG690xZIrI65JisaG+SO3/ANptkjH3jme3ZxPynyIDG+Xo7rX1wLy2m6vfrjGk8rJojewIVvlYvNtSnfr/AN8fs/SwnQJzCFX13yK8qEqHyOv55USAF6nfe30xyfMLIA79art+7G11QCICFI7+T27/ABxosU97oG23f+GLzVIrYra+mGSzRgUPWQ3TkDE+SzoJRS7n8MF0NUL27t18u2AZjS3e3aj0xuYoYm53Tb446AmSEbGXcr83FpXnjUadwT+ON7rFeZryGwxCL92G6vRzUZ7q2E1iVJK3EaB8/wDtlfLKDzOp7t9FsfjWEZWc0dz1rF5eiG2723yHa3mGcUAKUDfbp/q8ZlbbCVrQoHpt+OUbhbYldQ2MeU1icoqdw6YWbWLqS3ZRR6H+vhlfV5JRiJaJT3236f6MhJkyGIPkL/HBJjdsbW7rt8cC6UggLTLp02MEZQRVBaqKeuZxG/dS2ztjwjK4yShuwN67ZLNEva5lcmgosKLNur9cM5k5EuWg7Bs+eZ26dyvPpeGEZkBXme/vbGF38LmWluakE22Cr/Ppg05aRFFkC1dXX+t8SNja7pSbNHT5Yxyi+9063Xn6uX4Q9sBTlRS1aH5YZ6hGDGVR8gbN/nlMpz6EhvqUbVhNQmhzRU7JZfzxPybXRltZJFNgU282vyx/bpUVY2AMZKj8FzNqRm0oRb2TbEhNH396boOnrkNtceLY+5KcrFpZO2+/VrLNTiZsRXmHZ5ZWnwrbMM2MpyWRELbDCTkUlSPh1D4ZTk0fpWr7hst2qAg7V/oxniZbw1dKEy6Hv9UzCa5NDkkI727eW/fLoSiDGikS12Hqd6wTtr09bThdQlEdrdTYOqAmWPFyjIiS1G0Y7Cb/ACPLMM+VmCRB3afLt/pwzBRgSqjds+m++TppulxHtNOXNKWpJUIgUfGnJDWixjp6mlLmoDl1WnysbrrmBglryhezaP4dcNysDr6tbYsNtUHTVi6cGN0Ep7Fdd6K+uSMIyahw+lV0rN/Den4+uZI6k4ykpEu6B6d++MSlzEyPNGqVSvm4GmJ+jspR05E1+7zjHfzExmQyjGWnw7FqklSPxO2ZueQF0IXu3/n0rEnckYp57orXdxNJquiy1YEoujDUjAtrUvbyLLcTR4zT1qHhuWUnqFhv6fvzm7FyZlpuX0fLbLNOUCg1KBF5i349N8qS10o6unKfs9SESY0Gw/Gl3x9bS0QvXhJiVyrEK/1vnLl7SbzQn7w9rL+HljGtqxsdTUj2SM1E9PPIrToaMdWE9TS1dXTLOWKNIv0x4cZPSlKGpDm5dtoovr1TMEnUjqDHUkl7tN/Ux5cRqL70hFUVG/iplRshOBqmrKcJDsjIa9KrL4cxEDS05xu+qNfI/wA85EtQmlRgyDe4lJ8QMt09ZZtQqKPLStfRMErpcum3Oeg6Q7y5Zbd8Ei4BFjIAaIxlZ5NVmDh9ZhqMY1qRRoWujeWfpOlqSOaMoq0jEd788nqtLdTT0TSGOnElIRQqn4GZ4RiSYIWgq8w/Kn92Wxlp0y5feE5ZDQ/Lc75DWgv9LGNrusYtfOzCaT2kIvvwlGAW7tX02OuX6XEwrbi0glVItOvmZQsIyZEYSBoApNvj0wGroz9yfMSVvmip8m8dHa44hjOTq8TBLqKxHb12b2yyU49YyHaqjBT5V8+2YXR5IsScZw7RSk/CnH4eOua0pQNM5BQsHby7PXKbqyfExlftdNYxN+U5aPLGhpQjA1NLiJRkl8sorfShQ+GZv6Z5nndNlv8A7wR79P4Y2nLimMljpaopUmVfl1yaSL9RjGEOd0rF3YJS3va74szmojypZ0iieu7XTG9rFiEuGhKT1DVTf0HM2ny6WtZpj1eV1g2+eWG10YwIMZ6ighGKUm/Wxfrj8sZB7+rFXbZkfWisjraUj+k0aTuBP8TK5cVoRiQlBHmW4qCfBNsirpwmMZEpJdDvG9vVynWlqRmxOZidQl+SZZHieHZIOlSFcyWPpjkdDUGowlyirGY7/Ue+U9qLJVyQRstlJr8jJPTlzEufSYotdQ7WD3+uao6NseXhuh1UR3vd5ss1JckytAgp2Sj8G8i6YtKEpG+mPUuMU6u1db6dMMZ80n2dyF3JXu35FZZqTZDGOkXewxq3zs/hk0mekVLh9WFu5CYj6lplRWy1RJQm6Y17rFTrv1vBKXEatpqAnkJfyX92XfpOnBriNPUiNgygjfSrFMWWuShEg6lRbtFHcdxKyKrJcQJLWjOTZUebr6gFZcz4iKVp8xItjIVryK+eUzFgjLl1Eo92q223H9xjaWpqw0eU9q0feHp8K379cqLP0kD+k4bUAaSO4HzGt8tjxMDY0drEqIJv2qvrmZ15Qi8utKNgJOKlnrX78EeN5wZmnNOqRbHGja+WtFEYMTqDGLV9euVahDUqURuzdiCfCmsP6VGUAI6YjYOrRb6Xh9uk5S9nGNO7p6nN+I5Js6CAwkx5xbG1Ch2rrlUk3YSIpuFFPbpSGa/0ibKMoakNSNU82naelm//AGxZasUkz9kBvbGQNdtzLs0pjxCQffiEXakEa6m5+WGGtKVxlrQlYbMha79/XLiGjraSsea408oJXyevbKocPoqkYRt6XGRVfJ8zvgMmgESWpG3ZQ2PO9vhlcP0eIryS7PKF0OM8HKBFWInUdNTr53g1NHWhTGGlM68pcV+HXIBqz4ItW1/qkaB9Mqf0WSRikEpGMlfnRV5dpRgxZy4ZjK7rnEX4Jhkwk8ktKEWranG/lXbKK46IRvS4ictymhrtvvjVrkOY1d6qiFr8nGjpaUqvVjZexOrQ9EXDCDCJy6kUF3lfK0+p+/tjZ8KoOpK4siUlpWJ19OplgcTGyTRVhym1Pr88LpSWU32ch68pEem1NYvJraTz6JNXfamvpg0n6RqoHK2xoaCqdtsLxOqIyENqqR/H/VYefieYvQkKUcx1pvfdySnrFMtONu9ohXomAulLVnqypiu6XJU79L/1WWwdRY3rTe5ULb/HKTTjqyuiNN0RN38XJycvLVRkNqDdfhk0bq2U9cCOqPKu7KLv9DCSmR5XUkiWBpO3p08sqlrTjRKpF9lA+e+EVjZfOO6azT5fxxoRlKHT2r0bYo/RfL0wLcQNWck3Rkxrz8r3we+TWUtQU3DUJbbeb19MEJ68ZDCOpEE3S9vkOULI1IwjKMprQhtLbf1cmWSlLlKIW7b7dPpkxs05Up0QL35I2PrEyt5GIvX1aMOq8rG63hHqehvkIgPM8x2oox/iWWd0YTjSiWdDfE9sxUAb7UrkZU7FHe3GsN137UmE3sbNmV35G++RkSFpdu7b8emCJzUm+/d2/PIkonkjQj+ONLtLH7wWHVar0+OGLAW47Bvd3+/FDa2cbvo03gd9y06LRWNCyWqC7HKblF5OcoEU3eU7ZWkp7kqooFOmAgRkElVPPvk7a60eKpsF9h6OA2W53tuBt16YQiCmz2vJKUoXZSlb9Muqzy0WT73MCya2E6fnjMkisom1UO/frk5VOZLvpRVYWbFIzaAurq8UnYSn1uW9Cvc9KcaKj7ygFnZfL5YnM28kb3qwW8aaTLBvol9fyyfC730baQ3YBYj1TBz0cpQu1VdGSU+QBi8wXs1t+/F1JcyVGRLcbrKWH04uo3fQKRrA6eoy5WZR0KaxR5ej1o65JMo3vG3bq7nx6Y3uJJ30bkmpJd62DpZ5+mTlQdhejd3V4kiUUZSC9ymq/wBXhJFlTlsX16Hp55NdLvsxVUbyW1d/lhUIopdNr2/DFjK75ZUHervIRkD7/LFatAX5ZYlvZSQyUnaFjWGHKAtW+n54ZRTpu+ojX5YPaVCmJXmVj/E9LRiPuqlFW9PxxJRIo85dWiYsNTTYkAbe755bKEi6Tm6NpjS76ImpJEQPOOy4WFjsSeiraYDVCTaMuwCV9P35OaSXKPTZbpfXH6TRHm05JF3TsfheRZsjmEttWtjJA5JqTaXo9H4745Kq5uWgb3WyumFkOy575TY8wtfSsEhjEsi7UjY/63wJICRtZ0C9vi4nMkndut7OvzxDoYc0V547HQHHJxnA9/cKTe8UeaPu0BSBvvhkxgPO2vY6299umVNCLGbMkNdh3+mI60SDzRFZDSbu/XJzb1yojtzF48JxklxiBa7jv/qslWUDWd2TEao3uj4OR1tNSudstQ3+F+WNUS2i12QPLAtBzMaNhOu4ZNNb+E553zz+7eyhv8vPDLUh7pqbhuV2/HA8kg5ZFi2/6MDpxlKTOOwVYg3l6ZWwkklIyQ2Aeu3niGtzarzTSuonY7fTKCDBJQluPRbxibLUOYG+rfT1xYStDqEElGcYyjdcvf45J6xOH9JKMl33ej6H/bK5Gnty8lr5NGDkhBj7xsvR3Hzd8z217Wc2mRa1IyXtX4ZUkI+8SlJOm/TClRlIWKOzQX+OTpAdRoN7rzPPzzTOgS0lKTQd29/QxIijyySV3Qjt6l2Y6sul0je9CduuHTj7IVS3Zet/TG00IasTed03Vi+XS8aOtNqMtRi1scm31wGpyjKN8yCNtHywSmoMQoaV6W98ny13FpKdCa0W3dB/HbJJtUpl5oV8QrbK5TnpVKMS3oHS/g+jiT1JupBYSJDahQ+u2X/Da2ftIlynHZ2DoH0yQ1WBzS0xvvGW9Xv8/wCGUy9+5FjdCR6n7sfSaYmpN1Infol9QO+EWe0JRlGbyLeyGw9WsOn7OOik20KiRDf1XfzxdSMI1KUKXzC6emzlcoU80mRVbU04Gi42LcVKGINWb3iwdaErlroG1b0j+GVSdOfvRW0KrphZS5UWXL0Rk09/4ZO4vtonr6pINGrBRjFuw6+TgOK4hgwlB1JLdyiIee1eWURly+8c4rdptfz67YJ6wompMnailU/hlT0fidbUYXLSiTKbIlB8HJHWkwJQ0wdreUL+mVampOPJHmOfe2Xz6/67ZbLUlKJKdMR6xRar8cC39K1LqWmRJNiIfjWWw4rXhAC5xCwkC/Wt8zDDVthyiiiNL/CsBygRAlI6gL+JWRe2ufiASjz6cIi7ydNX6lY2lxcUkPEaSXtGQvy3fVzHCdxlJ0xV28g8grEk6VvNGhdrqh+LhO3UjxZqlatUtBBKv13xjX4aQkgjJO9tV375yI6RtKMre4BIDbIwB+/V7oAP0y6Xv8OhOPDs3m1yJ030xL+OHl4X2UV1d2iogK9858tLlGUdTYsB6/CsTT1WUwkT5Ni02PnkJ/jrGkwimjCEoWgqX53Y5nlo8NLUZMNTSUFqKl9+95Q1KSRYgtg7/lhrUgCcvMNW2WeXUcROl8I6IJKUJC7Eri/FsaxNKEIspRYUu9SjIK7Uo5Vp62pGLIgSWXaQ7V0p37OGU3rE5XdCy7fnl7i6i/T1eHlOuIOVKrkiF36jl9cISCWpqMboUWvgGYdQd5rKKltgb/J8nF0kC5ag9QtRPw3x0dx0P0ThdW063sx5hDyrfDDw/SaIcTqwU2Fsvy7ZgnqasYe7rRlEELBrbp065IcVqOms1F23gJXfpvg3G/8AROMhIdPVjqCoPKKV8n8Mq1Nfi4RIa3DQmC+9E338y8oOJjpi+ygKNIIt9xOmTS8T015WE+b+skrv5JjVNxp9szDn0GIb3FR/PJLX00jcdaMjdYgh28n8cq0uNj78uYitLFA3epSZd+kkhZmnKAW07vfzrFIWOsCISin/APRLfjQGGXExkvtGERa30d3ruU0ZP0mEYXGWrG7behW3pfXE/TpyNuI1EN05AD6XgPDX1WzRDVEpTSBryu8fm4yUwjoakR22ibVXrmeXF6hYakSrCMtKwvrTW2GHiUiPvaWiy7pFL+hgayXGBKVTW6OYixvvVvX4ZVqcXxcQvTjFXd5QX6OZXjdWSzgwOtxijT50u30y2M+NnYShzJsLFU+eQWaHEzgSlqz1JC7goXXqOWafEylBWMZdxUU+oZmvi9GfWF9+WA716GGWvxBvKUJLs88XpjRtp09TVD+i1dOIdYyUfolfTD+lcVGclNKd7BQN32pcwPExFlOM4jssAQfmXlrxXMRjo6vESb6SiHw3s8/LGjbSeJ6rzEtGPV2Vdj4mSOua1MdDUL6+zkl+f7splHXYp7LUKGubSJA9+/xyj9K1QOdHerYcpT5uXRt0dLWBeaGsWtS1IEvxXJnP1OJ1yVRnAPLms/PJk0bc/U5WUQjvyRvt/VMbloVkV5VWJrsI8oyX3IhQP9UylIdJCWFX1usel1tZIvpITzqjI6e1krXsF1g32Qrb+sVt+/CTtAkteQF5dpxgwJHU7VV4eVjfNyl+Rb+N4JEhLZJW9Jk5rK5R27r/ABxIl/BosWVxjYNquLKRby0rtVGCrokovUI0OGOhJXlKPNXLdJPaVJD3TevMfrgIy7tnYHfBKDGW7ddacY5Y9IyDsr0cf4JGTG/aVETa97+GPzGrOJK2q2SnFlcqkKpuFUYFjFOah8na8m7FmqeXMtR2DYpt+eJy0/duVbr29MDqxF96n4O2NcIoyko+b/lk+dtfAE5jygWN1uv4YzO1hG+Z2pQ+PTGdWLfInk75WU0kobvZq8qCyI1323Rqvm4ZIbsxGqRLcar5uaQjvtfyyuU4xWJs7Up088ka9ixjCmQ7lC9Mg3SRLO9/jWGTUCQEnpaPT59spbnvK34bZrrTnbZTpCUqZqlVfT6GPKMkIkQOslE+ReLDU9nH3I/G+uNzznsoWd7ydLNz2SkpEAbS236ZYkYjcxXYOqfjiS2kPPHbqBV5JyEKjYO1WLk1V3CcsbUFbNn/ADxqu2m+y0fHHHU5UikDyausSQ0c7y9KadmsaX2aMeQthvVCt4Jy5v62/SmsHNcVlNdqCgvF54QojE5rNg3+uXemdHOZTlC9uh/DGlp3EJLa73dYntJkkii1uI2PxxSE5C6ips0NGNrxp2EWIkhB6X0xhCoxoVu1LxYRvaLubNNG/ZcaAxtqLEaADf57ZPa9SaEd5e49eq4qm0SqXre2GUy1LN0rs4Jw05adwsRs36fjltsZklCUGzljXfZvCgUuz22tXCSI6ZtP2ldbr8+uS+blW2XY9cTJbhruAykBd+pXTJzVGg2rfb9+NGaSkSBUpVuvpg1NOM4lsSumyXjbOkh76xFA3A7uTkt63K9hb2yNxkRjAJHeIl4urNEV5XyC3Lo2tn7pvDt0dkxIKFhzDsemTTnPkWUUE+9dOIEpSqRUQ2q9smllg8tIxZI9TsfPGhCpc+9h5Xvj+y3GUqUoiblfHByEVt37X6+eOzUEeYCO97I/Ly6YOVhFs6JZSD8cTm1dO5MRErY/1WPzte/sIO+Se2u5C6U2YzIkQ35QtXJLTG6ZEpOwSoPjtixYFsWRK62Nn54jKanXfY3u/TKz/qyMmEWIJT3PL/Ti6ktRkLEmBs1+O2RZikpMDpQfvx9KMSAEyzo30wbSTcYj7sQN7FyxEI1KwDq9d+9fHE1R5P6skOo/hgiykBGdAbsnZ9DB2slKLVgIUpuvywKxCSbACAn1yDGBtSoWht8MLqwpjIUu6Wh+eJC2HlGE6qHKoNXtbiS0wuXIjW5fTKJ6s3eLyxH7o/vcJqy5LkNLt7yFfLHZLBqfLzwjKncF/PJ7VfermTZD88eJyjPSjyiNBdv1cTTgsrYoVahbjYPLKMbYyiXYMrEe5lkJPLK2QpQD38n5YmtzSgXzDVUW7X064xLmYiw2OqV0+GNUlTniq8+9bA3T51ismMbJFDTe9/6vCR5RBAaugbxuWrpgx8qR+eRUNM5Scm2VId6e1euTUOSVwiib1vfTzyrU1NUmS6Qsvb8MthqSnJoOW9nmaC+jlOiaTpyVCTe24dfjjsoFxAbCg8/PK+QlP3KF3QunGhKMpHMSQN2INfwyez0sjO9hlBC67O2/X1xJTvTVWmqJUl+v1yxSVyiVRyo109N8rblJixkxDq7HTLo30zvuTJPLFa2i1fyx9OMmdtAevX/V5bsCkY8r8H/thgCPTmKqo4Q0kY7jbaAjv54s5MaEm96em56YZSd0rrvUQMSciYEp1vV1Y/TJqG1iMYF6Zu9TtXm+fpiBFjKEuaV7CfxMmjCSSNLVeVGxu3E09QjPlkTJdig3cul2siQglR5dt3fHjqV7ogO4iDd98EicIkkZtVTvR2+GVnPLTRhsi8xu/CsHy0Cxpkt7WFqnnfTFFI0cxvSN7d+23fK9KPurC2gW6r1+GCSxiUCO7TTeRdrZxjKaUDe5Kxv8cTTIylTG07Etj9+SWsLGp09LOvzxidSFnFXq9BLunHaU8Y6bdsiSNbobee3VzJPh61N1tUsRfjTlxyxVhNiolRdq+bvlfspS3lySuq7J9Mdp0t09MjG2VlO6fhiy0yxIiLZUav6OVMdY1ESRGuhLtf5Y/POKDBAKtDyO539cvZ0hrsJhzEoOyL+Vm2WzdIiMWNvblNv3YpItUZR2Xa9g/DFSO+oxnV37vQOmDS11oEjl2Det+vf5YkZaUpnuyt7pvfxHFNXm99mIF8ol+nTGlqurEZJKCoDdGRqRa6cINx7nW21+d75Iat7NRQq16vyHKoe9UYsjq0KeW+PJ2BJW0bFp2719cbicasCUanCXKV5iO3a8EddiA83MlRBKd9jr65TLT9myIypporv1wadQm8/RG06X5VWXpJtqeKnpbJKqOYkWfGzFdWM4xNWMRC0Ymy7l9MyEWWpKRMlCt7OnxMsjLTVgRJCm8XYK8qxpdtZKJEIakiwQFKV9MOnr8RpapGc2cXZJW0+TTmJjpwbdV63UZUV8Ewxl76hFiuwh+PTzwbdB1/aABp0dLgf68/pkzJDmItxeb0syY0bZJxHluQPJHr/hMrnyg0l11DrlzGUuXlb9yNbH9kwaiwd5Bt0A/PG+k9KuYlTIlXezLb0wuKBfQscSOqNRWT8IXiykrUYSaOsj+GOk3ab7/NyExfJv88aFF8zXoO78aytNadMYAPrjGnJfekh8N8ai7yGUo73qTvsh0D5ZDUYtRJyXcsA+uGUIRiSbb6OKyqjmlT0vL0m6bUlrTSJCJezTbiojUr9N63ywCq5908sRgD1jJ+Ljs3DSIR5QN0624BlLayu1G+V6kZFFcrd25Zpkoxp5mXS7zO+1+NiQgvvSmp2TLHT0pXIgtdLehiMkaGpO7b+4ymerLnansb7tX9ct1KSWxbPS0kCI2dd6+WSMo6btGNBYDafTKYyi0zkyHelaxtRECGly+anX640S2dUxMnUE1Ebd3+PXK9SnUAlQdrvf5YDT5t1unpaGWEoxTl5FOpTt88cTlu9CMuQIxZPRWNFYN4hIQvag6fjl/POSX0rpE/e5VKq202+9yusekv5DT0rKGjqibp/DK5bTWTuqFbD55beoxSEYG3Wr/PKCSyHmVHetj8Mlmm8avjGLBR70dq9PNwasyB9xoOo9crSuX3eWm7vrk542vKXtT1yzbNs2kmUvuRQd92hxuSVFHNtdXVYlpptybvYOuEnqbMfKkQ6Y3fk4y+jyKo50em7dfTIrAqKPM71e+R1DmIyggbrHq/XHhvQbUVT1+eTfwvH5GMZQi1GMhOytYnLqSmshI3uGw/XLNLlGUYxWT3FxF02W6qW1Lz+vpl+EiRgkliSqtwR2MknlsIduq2/TDBiRjI5quwLPrhIzk83LUbG8T10W9q2Om0MXm62yQcEnlke7XkXsYdeJJSUyg2Qrf1xIKpE2ibNnT55JfyvHc6XSCVMpKnRN6MUepzMIXYDvjERuJsxN03HDqSgBGVbF3W+Xr4SXL0MdLTjFnGbV73/nizkXzHKxeoD/ABxZawjCBzL02qvlglJA/o4j3tV/DHSd7FkkjkUE3AqvMMTV04hd7997xi1ZMlHoUG2Jqwdlih6uJ7W+gjUtNAuu940NVKhEdt22t/l1wCSiEI0nVHdx9MjJDlbBtS7c1WYvnqLSUSetlV/llZOSdLb63klLR0g5iTLudVzPqarJPZRYX13tcy0tCZqHuqdwxpSSRcE67YNAmxqTVnWryxhAic0uZW91G8a/Cy/kZSJFyZEQtArp5YkZxbI6krNyxofrgnpacaWRQNBL0+GKREsGJe4O2ZXo9qdLve0fzxVlKQsYEa6XSfTBPVlC9Pmi30oAtxknGPMy94KUCj/PKgJGiuva+mHSZlr729kWVYIHvhKU5be8p370ZZGKCxlyu9st2u3XLKdBBmrcbBdg9MclKUl5yJ0YhR8MzMpyeaMSKNX3ceOnPleeV9y73x2fB5wJyVoDeonbFYQRJR2Dqtv0wwJpUX3bQCh+biy0aaViLaKONs6JprJ5YSqvNrLSUSRUhDZB3v65UwIMjaQWobOUOqAxjELd3LojZLUI/dmEnvV/SsrjxXLEX3962KxtPTZwjzyhSWN/xwjGHuwR82hXIvW057plEIi0h1ax9OPsXnGUpNlVtiwNOV9U721+GCUZteyqvIcSVdxanNciKNXKw2rATiUkgVuvL5ZTvJISvb1r8+uMXH7isr3CNV88dk1Vk52kbENxut8k4jOMiQG2477+ab4pLVlFjqxs67NN+bg0tWMIpEW90YiHzyHazVnKND7wmytridKAkPVq7ry2yE5q2bHawwampOOnEjfMlqR6ZYlmk5LuRBYm5fljmo8r7MY3s7tfm5RGc5SIyNu6tXl2maqDGJyj2aQ+HnhdbGTNkyXd7JsmV3TzBuHQaRyxeaYjIiNI5JQJQZM0ku2z06Y3+TSvR1YSlSslN7KR/flmpoQZkoSkDTu9HM0uXT1CUKZDdBQ5bp8ROW+oVVmVFsuaClklP6wefmOVmpKRyy5UXoKnyy3ReawSu91Y5k4h9lNEqQ3z23kNNHskhbIB3AsMDKBQSgqptbv9d8zGvIQiRkdLdly0ZagSYQij1GrwsOSL3jVm6HYyxlpxDkISUvbqfLKSCosre1NGXSdPTgWg1fKbfTzydnQMlgFAG+xbic2lZSnZVTf5Y0feFNOyJRWy+vXFjUqjH7yNidH9+N1ZjDhDnbnLpsyLPwxpbaax5etEoqOLKWrGRF0ygp27164k5J1KuN7lv4Y2nFm1Iy9okbmjdxd/45o0ZLEOeVuyOyfX54rKZby0p2BE+Hzw8PMlIJREHa7B9ae/zyprQMox1T20Igu9xrLY6enzEoykDSJLYcLosukPMKa3/wBemV+yYRP6TlbCgr8cCMWU6J2d1di8aM9SNQNSND8jBGE5SIsSVdETffyyPDyisuRQu3yyNb+BnJjI55b3s8r08xy6EVgIwq6KKW8T2m9SiKFcqdMmoEoVXLte21Zeme4hpMXZiA2Dt+7DdKMNu/LJq/PM+kyhJuEpK2JTlxqRjHZ2u0SrwoSgXcee72S+nxyJCjlZ2G4g5ZHU5w5ZF3RX+tsSaxi3FZWUn538sbNAczszE9Wn8cmGRqTBnC49dtv9dcmNpx/anVnq1GF1EhDqJful4IRI7rAXuIv448pAxZNe5Har/qmK63OhGjbqtP0MTos3fSEkltBbaVarFlq6sd4iDtdjWNqwlpx7K9PXKWQx99k32Ct8lvwuKznm9dSvS/3F45LkiyJxJeW6/jmeEuQeWNX2ev44bsX3dza3fG112t9oyElqIdgL29DtgisZ7BVbMin88SMpnVlym2xh9rpxLkb9rLXfES7Wy1YgkmN9Nk/zxCcR6h2ttwc8ZHaN9VxWVPLGe3pmox1PZ/axnL3mUq22xpvT2WlOLXVSsriQH3YrJ79MZ0olc9q7tI5L01O+gQQ55SlLyJFfhgkhJqEtnoC3lsY7BDZvoybcbVmxE35r88nurvUVe0k7ow22Qt/HGZDRKM0fKrcQJTkM2g8sMotkmUol+dv0y2WJjZRZKcpp+zPNN3LOQI3zRiV5XipPaW6dmVGD28BiMRlXVWsbOP4Wx1uWPLElT1aocoOIjFf6OS3YLQZcjIqWpCA9ovX6uUyhGJUID5ru5K1it5/axCygtIrt8cVdMsYteRiaUZQuY0m25+eDUnQqrfk7Ylnyll30hHSlIZRAOgbuSXKySIRimwGAZMVIqX2PxywIxhuovfcy62m7DcixH2RHp33frgYJvGRs9OtYYxWvehIvYXF1BEQiN3Yrj0a2mpKfPGUY+9I3avvvhjGWyzSXUKoHFhKTL3UlJ+OMuqdZN30UTGvleXwSTJkDfTdOn45ZH2b7qKnUu/8ALJGfKXJs8gBvF9tTUYwB3Vbfwxvpn5We7E9woep1xJqULUXorR+GHm1J9CztsAfXJKEGvbasYh64Xq3srpCnNIQ7DgOVkkQ323Lfrjz9iQv24h0BP4ZXo6kRGMt/Nf8ALE18pd/C84bvZDt1d3K5aMqBSQ9xv9+Q19Nkjqybb2LLyuWqMj2PNXnJK+lY6XVMQnpIHRug63698LIObmsTqO/+uuVEpE6nqSW2gayHLKrJzVpGVZnfbXx2b20ZPLyySuwGJrSJSIgkX+15/LNcdKCHuRg1Q8y4J6XshZByvlup8XNM/pljE5gBX0HLNWdBHSixe6AY5q1GidPlzbfDBF5qvm3LsTfLuJxqs0WNSnGPxu8tnq6ZRCIyoVDo48dGDUlj6i3+WJrRiAQCK3vXUydHZhnKNrG5G99vnkiakbqBI6c24fXJA9mBOD03t3vE1NWRZVP45r4T52IJfNEO7W95a6siAR5SLsGzWUw1Yyl7/NdVa7YTlBYiS7b3tmfTW9hKMF3Tm71FcUZzkkIz27rmg02UFnGl6N1WZzm0tQFofW8sm4lslNpMYyRik7rfHkqK1HfZG2seMIE1smtIsun1yvViCye++zZeZm411ew9pOMTc5fM64NTVjKNykCdCPX55nlGUqZT2Oh0yQ0WfNOTyQHqb5Wej+2GiIgN3JrLWdQ21I2vTldk9crIkiowZoUKL88kYyduV23rpkalWaepbsUhQh+eLKOnOSJUjqh19Xth09SMWnT3G7GnGZF1G083f8cTcTctLDSE5RHfrYY7M0giwh5U7r88PJKJzlhfWtrzPr6smPLJJC3dU5e0q01tGMem7022v4405aY3dIXQ3+OUcNoRk82qPKm17Zp9lpxVi+75Jf1rKdE1Z8wS5Zcx0srb45IaizIygc1Vupvk1NQkITGtj/XXE0iA88i1bEe+T/V/xZTLoU9iIv54DU5dOUDdewbXt9MMtV6ECr7q0/X0wGpcQZRe+1uTpewjOcgJX1ouQVglziBFBSm/9emFIyvm3pqzDImQTTl07emOk3fmG9pJ0yMpQPUFR+eNqx6EWSvcQB+WURVf6UXfdHf6ZJpzPIpFN7Uv8cvZuNumSlEie891Dp9d8z63NGfKaZyne0XKtOaJUmLVbbj9XLvbEj3mTv8A2d8L/iucYSiRYU7UjdfHBDRlTyzJUbj33yzT1illCMpXsbF5aa7ygacA7pWE9s0iJsadS8xvEvmX2trt09M0zkEmRRbbeA1AQjp81vQbxuGqpmaLpkYaSIfetVxISdIaunrvWWmoFsfd36D0+WElGQ7R3vdUXL0zdpp6hdvTuMqvL709aKx0yhppMpNOcrI8iVuNO2KwkKch6hvl6idrWGmWtldIj1/HEi6W6bJsc3/fFly6ds4Bt0R3zPCXPqPK7XsO+RfTVzyk2Tvd2AAx+RlS72bUj9TtlGvUInuxHzLMbQ1JSio3RddsnFqZH1dTkiDZFFNu/liurJaZDGjfrXzwOqyiRakeVt42pqQ9nU9KitqTb9+JDfYstWF8tdei7OIGoy/peaMVrYvf/Rg00lsSKHbmvbL4wn2hG66kkX1xqm4HMcsOVBidXrhjrcwxSMaKPXK5TlCXLI6fPFlOKh128qyLte8pG5SjzXRUe3nikmX9aNNGzT8x+WVkkuivl0xtOd0Sq/NsypurCQQCE6A3uVt+eLqs3YY1tu9H5ZXr8qErtP7P79jK4MpDdVdUKNfB2xo5LZBHecItdWO1/jg1GAEoakt1KFS8He5FiVblcSJOtPmHvyt/njtdw0Jzi0Mr8hvJlnNFTnQf+YTJjSbiaurH3QaeSPUX+qZUwhNbkHqJX4YZzhGURN2EN7r+qYYS5lIEn0C8ks0tll2SEPeqOpKZ3qz8ctgcst9ON+aXlkb04rHTmJ3arK3V5m5N9t28siXOejamrZy3GSHYaMpdGCRXm5rqjsZZKUKuz50ZOcJWMdvpi6SbiS4bT05+9qS5e/vZTOOif7onXZp/PHnL2slRXzNvzxamVVgdLctkqTKz2EJkXlnJC/Xf6Zcw0JBTAHfq2/LEjGSiPTca/fjz5lB1L7bUfjk1Y1cpSBoxavf1j/HAkJyOQUHdTrl0Y6UYPMjZ0C36uUMY2yJOxsWW5LsxuK9YERjpFHdcX2rJCGnGjbY6ZRCUpSLXfoJZmjllD77HtR+e2+WUyl2WcpHQPWmsQlI3ifHes0WtVYeaVeLPS5hmu19m3LpN66UuvPTfu2313wQnBbnG1tfLHmsdoz3PWsGnpyW2cb8+uTTW5J2jqwYJGERrZS98rgXO5WDtQXv2Mvlprdy3Onu7ZWrGT7We3bveSy7WZTXQe3lEYRlsXRyuVz1uYBje9LVplwDIpN+ilYzp6JvKay7coUP78WJjVelrkRJihvs9Mt/SNJ3qQPk1eVewF2QK6uJrEdMCMiSX0tq/jk7jX9bemiEmacpCIPWTdfLGdIsXU5u6xKrMelJjMTqdFOubBm2yquiDll2zljr0WMLkqrEdhu38cSYxu9Ojeld8tWn3d/i9MRnIsnLaq2QMsZqgJzaiRPn/ABxuSS1PmD0T92ScoD7jb5A4xKcesS+1nTLImxNKUS4pCzf3t8qjwpLqkq/5stBW5iqdHpjunGVe8Rex1DCz/VUOXSadMknS96xpQhM3G16RKDDMmQQpBaXE0oSbZSQ8jviJdpp6UYqR5fi2Y0Y6ZJiEVfp9ck9OANStOpzX9cXTmaV8nLb5Fv1y6N0GBKdROmyxHG1NEhHmJSkj3NzJGayZSjS9FemOc0til8zc/wAszcYsyquE9WHUU86UDDrcRBiRlz2PRK+maA0owfaNyrs3TlcI+1fdlHZ2O+JOluU2zwWaEYwsdrceOijUp9tiJ08stnokZrJ5V3KQcQ02Unl1La7ouRovsmO8Uadx2fzyrnedWQd6u/hmllMOSbubKF3lbw5E5pIRdhvJf01P2ukjFkahSXSXv6YkVTcZRO8tqyhly7RnsPc6fLLXiPdYTgKbEjbErNxo1zjRcY9Udwyabyu06b2uzF0tb2Y7SR2SrD443tNGQyYAD1Ws1tjXfpawnIlN1CXL2N8zurIkyAX1MktXTGoDu0HN2+mUTlHmaOvUG8TJbi36EzWXaIm9BtjazGMPfhTW3K9fllHD6+lGCQ0mSG71LwF6mosxDoBL+GN9pro5AYsuWTZZRd/wxZVyUDfl5ZZqrGPLCbE7CC/xxJaUgiLJXv0/AxbVxk+Q0pyiPLK3yi7hjxkV7R59rN2m/TFSGjF5oPPfZrHCXIWANo1d/Nyb6avVTRtVZ+8tFh1y72LKKx1VTqJQOZYQSTLehd++IS1p6jGKgu/lmp+2LJO4ulq+yCM4kt/NusrnWqhpQBrvml4XTdM57U6y5sqgR3IqROlJvg90oakZBqz907VljqwIJGavfbZ9MmlGMljOMl8+asXiJx0doR373u4P0oIF2Ld/DLElOkNg2B6Yn6RPUOWIMu1RN8MNGUJDOcbuwu2sbJKu5pMQeVDsn+nBHVI+46cU3NjpeaI6kS7hEeghbiy1dKF88S/NLx0XYMYQCQhfa28GtDmgSgSVN72MQ4mJL3I3XTbb8cOtrynDl5Dc2eYX/LJqLuqtLkZc27LuKm/kdsvq4+4MZ9Ek2O+TQ0XSCU05t6K6fPG1iUj3JVvZI88aNqiOpH3OQtb5skZJBmgxLEOq+mT2EmmepzI9eY/LC6MCChLq3ct/pk7iywsp6U41OHInR/7YNOUWRF5mPS+jipy1ca279zHPZ0XsmyX1xKXGfAatxRIRkPR3/jhjGRT7ZF6xIlGX6erAqM9wNrOmPq9paTt2vvlSXTOxtZ84yvp0vF5rW4guwifuyauqjvu35mILe+msR2fMyLu2H04yjqHN5djtgnqxgVyyKuqW3yyvU1ZjKRpsYjW1v44ZSkw5mFnm9tvrl3Em4PsdSaSmxR6K2742loAe/tVoxOmVQ1QQlGRfQC2tqcvlJgNGp16MaydL2moOoEZS5q6MsGnounaQlzPeLZXyxmciCxKU7I4dKOqy31APKhfwy7Z0SMedWLcu49csYg+/G7673WGXCs1magp1OWsQJWxlJEaFacEpdaMYoUUm1FYIw1QKZRE2u6rDNhy783MPf/vh0NSbUUkxuq9Mm/hdT2jozj7zKDv2bx2erCnU0eaBvYCGNP3JsY1FSuVKayvVlIgsfd7NNP8Anln7NI8RpLt0XcpyuYjzQkSO4hZ9HLNAgQkFK72g4PZklSooL5GXpO5AQlXNNlHty0J6JkjHSjae05uiqb/AyGkSq/mkhxZQ1ItRle+xLyyLvo2ppz1ZDCcbDvtt6+uJDV5FjqaPOh1N2+2/l0yzT5mFzhKPbrY5XxUZpzkjyQKf88dpuFZMpNyYnlJ/jkynTnImMy6su8mXtdxoloGpKMpS6whdF/1TBTpLyzbStt3NEtKqWaDCJs/8plAwgqqvkG/1zOmrkbknONp81/diBAfenGJ3euJNdWSsWvV2wckXpu9wP35qfhzs+YGpPTJbyZ+VWFYzq6ZE5dJurFa/DfLIR5DeEH4t4/tWtyFVWxk0syUk5yq40G1RN/q48ZacG5xVfNFMWRCSsq+ZeTmtqMRDpZRjvSy42jLVgbnNb2d8s0+SQ80g2KXbK/ZTlutFbp5YdKOkSpGT5rtkkyW3E6aMdubmfMWsQ0+YZRJAdVKMmsMpjDTYgdjvkjrclQkXbv2X88cjh10JpRic87YnXesd1IMQ0dEH+0quGc9KWmA0dxe+U1EGptm3aj5ZdpJ+R5dSSs5KeQrjSjowP6Vk32GlwXBks9ZsegOJqo1/SDXZa/L4ZnbXGVbpsZx/o9CIB8XBElFs919cq0tWcV9lKIdLe2GfNKQamqp3AozUyZyx3Vmpr6hfv819axYIjJjVdW8YhpEQibvbe/xyOkRrnlE78q75dxnV2rffi1Q+a9cJDUjy1HmK3RuvpgdWLscsQ88kWMnfUs7vQyaje7A1dWbQkY12MfTjILhyrXVHCQ0mVQ95HvsZdyxA558p3IlBkkLeuoz60JRiSnIPQN3KY3/WZJ8aPpmnlispWcp3UvKF0ReaW3wVxZ+GsctzsYAWCFgbttemW1CKylCN+SfuzPPUhJPZRYm/vS+GIylz+7c5PmViXTNm1xq8s1jH9xmg1dTUAjo2HVvMhGZUtWEn0Gstlq6841GBpwGqJb5q+mZOzmrG/wClgw+G7+ONz8t8kOb1ehlNQV9qPMN2uzl+np6aMi7enlkxt9NZSa2yydSUvemnobYeSk55210bc0GjyrIRfV/djacdJsnVvem8tlYlZ6HqNVXkV8DLY6kIm0UX+yAZXMialxVN+pWWxlHlFj73Qt3+mZl/LWU1B5tOZRBXzugyl1CCnKPo5ZzD96vllE4W2XnRz+Tt6m9ckbujph5SNOlzWHVaxIrDLYy5oJJquhXXJqLvdFYkRZe+9d2skmEd6i2HQLysuLZEQeqXlyOqe9PTGrpKcz1tu2ydKFkrGOmUnVlj6XDk/wDerbtslGQ0ZF0ledNYk5cjTIu6rHGbTllostBJyIWlULQYGOpGlj03vz8zGJD06+jl2mLRuj5OLjPhfuX5ZudtQ5baQu3Lec040aLJdve6manSnF23Ot3eVT1NXUkxIyo7u2JNLll8s0YwbZvIruBuZby6O1ys7VEX8svnH3Yypvo7ZYRixOWoqbj32x3s30x63uQIxEj1FKvLOEnphLmXme4O38MOpIJNCCUxl0vKtKMSQs0Tb3SvxyfKzuaNqahztJEOqG/xywdEjbOUpVe0gvJ7I1lrUZIdV/yxZcPGBRK3pa9PTHZqDpmkt6it7Abt5clUGmoDRXX4+WZ56UI70shNyW2D2M5AspUdAtHfu47TpbKSNMNn+qdT54moI1GYReygmJyMbedO2zv9MDEjbzJ5XFe2N1eMsCPMWdb79ceTLk5FovdUMkJRaZakhroxAP440CJqVGVi1co1l3Kzqy9GjE0zmJb9Wi8XU0Y6lyZgpdLfyx5SIyYyjzBtdpvkjoshSgvu5J0t79ssIz0dQY9DuGXuoydob1Xlja5UCjY6o98rhqMItI79Hvm+tMdxZ79Wjv35sjow1RkyiPr3yk0tXXGUGg3cs09KMANWEl86zK+wB4WTzQJCbJ1+ThlrkkYKNbqZdP2EoEVR82OVcOcspxjKMhNrOuakS3sJwj9+TztU0gGGOnLYjFLd6ld4dSPJFlJjFPPa/lkjqyInMxR6Uhmellvo+qMoEqqQ9Qd/3YIvNFdTVObsFXinFC0SCnoC4upqwla01tZGrxuejtakDT5nUkChQF/jlMoE7Rk+vKZXPVAdhDo25NPVlPaIm3Y3yWRuWrIQ0gWTKKlAl5aa0oIxlGvLlqv3ZSMVCbqRW+sQ3x6qpGoSDqKHyyHYTkyVmadJZXUflh0+ZKFB89zLOeMw5SPN3XYfhlEnVZJKSF9R2r5ZplNXWlpjpyhHrvTth0tWcoJCQHcWvpjyNOQczcr38nEYacluonahxsVwYw1BjzMvILrNWprakqvTnTT0q7yiOjKDzwlQd3YyT1dQkDqN9SnGk2shCLNuzbYWvpl3PLSPeG18h+HwzK2HNKUrfXGhOGokSe/lJ6/DJpeX6XR4gR5zlToiDiy4wEjqR5w2vyxNTUhKJCgDruWuMS0yJWnKKdzvl30WRNSLrBOMSMbql3/Ayup6Mvd3kvS/3ZdKcJRpnIexlLKUkAK6AmLFl+CaspyScoW9GupXW/8AtgdPU1PegKeldXLZSYdUsKQdzKJ3GXNFlBfJrJo5GI6ukpKKFVZ3+WPCerBFJU9gEw6OsSQlPcOi9frhdSLIjFLurSr+ZjSzJNHV9nbIN+wl4uownqc0+aNm99K8ss13U0S9SJI9HrmGUmUuYlBHauiemCaanV04rGPQ3qrvGdYUuJIkVV7/AOWV8NCOrzc8iMol0dHGnpRaLjt0S8nZ0TU04RqWnJL/AKst6+eTLY6Uv6mpyvqZMu6f1/Jp6RqckpMvuR6P/KZPZQjVX0yZM1GMlEt50t4ZajE5YxiHwyZMzPbXwgWW4LbrJkzcYPCEV3Mb7jcdsmTKx8hLVknb6ZXFV65MmPhr5LPW1OUOZxNPUluXtV5MmcXoTVk8glFuCM5M+W9i8mTCU2ic9c295o19OGkrGJd98mTLEyCIBsYJn3ny/jkyYIyvEai8okS/6u2PHWlEYBFHzMmTKFrmhzPdwwD2nL2vJkzDbU6EfZ3zSH5YCEYyWuai/e375MmajFW1A0ubkgvqZW6cW1N7yZM6RxqRbSCFfDDMIRWJXpkyZKuKvS/pI80vPNEZ0BR9MmTHwnyx685S65bws5PMLt/nkyZie3a/8pqa84Xy0fLKJa2pzbTTfJkzeTngU1Jyju+eNHey2r/fkyZz+XZs4bhdORzN9fPG1IntOUKMmTOkccmqHD6TpWxzJrxjGaRiZMmVg77sYke5lkdOMm27+OTJmfluemLWlLm2azPyk5e9eTJmqzi1w0dM0x5DJ7aUYpGg+GTJkil9pN74stSQ9cmTKz8pzzduZpyyLtTvkyZZ7Pho9mIWv1xNfRj7Pm3v45MmZy9NYe4r0G4BRlepqy9qRKC+xkyZmem77XcNepJjJs2yyK6O0Fpe+TJlxTP2o4qSJT1MEDZ3frkyYntL6CTtvv8AHHmUkRarJkxkYroAEY1s9cr4uBo17OzfJkyZNYMZrak4SWT22PiY/DaZPW9630v4ZMmSNV0SMY0RAvK9X+ifd32HffvkyZu+nPH3SmrLWAmHTsZTOJGVH1yZMuLOXskT2kXnVyQAlVFZMmS+mp7DiImnTDZ26ZW6upuczQGTJmPlssDmY33u86PC6cbduhs/PJkxPZl6LxEQly7p65nnpkFI2HXr8MmTLmnjLC7N3dy7TXmG998mTJPbVJqTkWjvZix1ZLK62NtvXJkx8nwmrqSlpl9PI+GV6PvTp6D+/JkysrtYGPStnpmMkw1Dl2R65MmFjTGTKuZ6u+2GMnmK269PjkyZh0+EJyp957YP0iYqVt6euTJmmKJJZkkFeu2aOK93RUC8mTNMX25+nJ5y9+2+bOM04x0hiU+eTJhb7Vwkz4VZb/6Mzab/AEgUPXJkxSe3T09OHKlbUfkZm4j+i1Ai5MmZqwYakmAtXkyZMqaf/9k=">
+    <svg class="ov" id="ov" viewBox="0 0 775 452" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#e6c98a"/>
+        </marker>
+        <marker id="ahw" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto">
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#d8a13a"/>
+        </marker>
+      </defs>
+
+      <!-- GRID: Drittel -->
+      <g id="L-grid" style="display:none">
+        <g stroke="#e6c98a" stroke-width="1" stroke-dasharray="5 5" opacity=".55">
+          <line x1="258.3" y1="0" x2="258.3" y2="452"/>
+          <line x1="516.6" y1="0" x2="516.6" y2="452"/>
+          <line x1="0" y1="150.6" x2="775" y2="150.6"/>
+          <line x1="0" y1="301.3" x2="775" y2="301.3"/>
+        </g>
+        <g fill="#e6c98a" opacity=".8">
+          <circle cx="258.3" cy="150.6" r="3.5"/><circle cx="516.6" cy="150.6" r="3.5"/>
+          <circle cx="258.3" cy="301.3" r="3.5"/><circle cx="516.6" cy="301.3" r="3.5"/>
+        </g>
+        <text x="262" y="145" fill="#e6c98a" font-family="Oswald" font-size="11">Power-Point: leer</text>
+        <text x="520" y="296" fill="#d8a13a" font-family="Oswald" font-size="11">Sonnenuntergang sitzt ~hier</text>
+      </g>
+
+      <!-- GAME-FIELD: Kompression / Release -->
+      <g id="L-game" style="display:none">
+        <rect x="0" y="0" width="775" height="305" fill="#4fae8b" opacity=".10"/>
+        <rect x="0" y="305" width="775" height="147" fill="#d94f3d" opacity=".14"/>
+        <text x="14" y="40" fill="#4fae8b" font-family="Oswald" font-size="14" font-weight="600">RELEASE — obere Hälfte trägt das Geschehen</text>
+        <rect x="300" y="40" width="240" height="250" fill="none" stroke="#d8a13a" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="305" y="33" fill="#d8a13a" font-family="Oswald" font-size="12">Kompressionszone: beide Figuren gestaucht in 1 Band</text>
+        <text x="14" y="430" fill="#d94f3d" font-family="Oswald" font-size="14" font-weight="600">TOTE ZONE — ~45 % Fläche ohne Erzählwert</text>
+        <path d="M40,355 C40,355 90,345 140,352" stroke="#d94f3d" stroke-width="1.5" fill="none" marker-end="url(#ah)" opacity=".6"/>
+      </g>
+
+      <!-- TENSION LINES -->
+      <g id="L-tension" style="display:none">
+        <!-- Blickachse Vogel -> rechts ins Leere -->
+        <line x1="250" y1="55" x2="470" y2="120" stroke="#d8a13a" stroke-width="1.6" stroke-dasharray="7 5"/>
+        <!-- Brückenunterkante als starke Diagonale -->
+        <line x1="0" y1="92" x2="430" y2="118" stroke="#4fae8b" stroke-width="1.6" stroke-dasharray="7 5"/>
+        <line x1="600" y1="120" x2="775" y2="92" stroke="#4fae8b" stroke-width="1.6" stroke-dasharray="7 5"/>
+        <!-- Leitplanke rechts: starke Linie ins Eck -->
+        <line x1="775" y1="250" x2="600" y2="300" stroke="#4fae8b" stroke-width="1.6" stroke-dasharray="7 5"/>
+        <!-- Implizites Dreieck zwischen Köpfen + Sonnen-Gap -->
+        <polygon points="250,55 470,120 660,200" fill="#d8a13a" opacity=".08" stroke="#d8a13a" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="475" y="118" fill="#d8a13a" font-family="Oswald" font-size="11">Spannungslinie zielt ins Leere →</text>
+        <circle cx="660" cy="200" r="5" fill="none" stroke="#e6c98a" stroke-width="1.5"/>
+        <text x="600" y="225" fill="#e6c98a" font-family="Oswald" font-size="10.5">hellster Punkt (ungenutzt)</text>
+      </g>
+
+      <!-- EYE-LEAD -->
+      <g id="L-eye" style="display:none">
+        <path d="M250,90 C330,150 420,170 470,150 S620,170 660,200" fill="none" stroke="#e6c98a" stroke-width="2.4" marker-end="url(#ah)" opacity=".92"/>
+        <g font-family="Oswald" font-size="13" font-weight="700">
+          <circle cx="250" cy="90" r="13" fill="#e6c98a"/><text x="246" y="95" fill="#0c1214">1</text>
+          <circle cx="470" cy="150" r="13" fill="#e6c98a"/><text x="466" y="155" fill="#0c1214">2</text>
+          <circle cx="660" cy="200" r="13" fill="#d94f3d"/><text x="656" y="205" fill="#fff">3</text>
+        </g>
+        <text x="250" y="74" fill="#e6c98a" font-family="Oswald" font-size="11" text-anchor="middle">Einstieg (Vogel)</text>
+        <text x="660" y="184" fill="#d94f3d" font-family="Oswald" font-size="11" text-anchor="middle">Blick fällt aus dem Bild</text>
+      </g>
+
+      <!-- SILHOUETTE -->
+      <g id="L-sil" style="display:none">
+        <path d="M188,28 C150,40 175,95 200,120 C150,150 165,250 230,275 L300,278 C360,250 345,150 320,128 C355,95 300,30 260,26 C235,18 210,20 188,28 Z"
+              fill="#0c1214" opacity=".0" stroke="#4fae8b" stroke-width="2.4"/>
+        <text x="200" y="300" fill="#4fae8b" font-family="Oswald" font-size="11">Vogel: liest sich klar ✓</text>
+        <path d="M405,118 C385,130 392,200 405,250 C440,285 510,285 525,250 C540,200 535,128 510,120 C475,108 430,108 405,118 Z"
+              fill="#d94f3d" opacity=".18" stroke="#d94f3d" stroke-width="2.4" stroke-dasharray="6 4"/>
+        <text x="430" y="305" fill="#d94f3d" font-family="Oswald" font-size="11">Grün verschmilzt mit HG-Schatten ✗</text>
+      </g>
+
+      <!-- ANNOTATIONEN (allgemein) -->
+      <g id="L-anno" style="display:none" font-family="Oswald">
+        <rect x="395" y="112" width="140" height="172" fill="none" stroke="#d94f3d" stroke-width="2.5" rx="3"/>
+        <rect x="395" y="92" width="200" height="20" fill="#d94f3d"/>
+        <text x="401" y="107" fill="#180a08" font-size="12" font-weight="600">KRITISCH · Separation fehlt</text>
+
+        <rect x="585" y="150" width="150" height="120" fill="none" stroke="#d8a13a" stroke-width="2.5" rx="3"/>
+        <rect x="585" y="130" width="160" height="20" fill="#d8a13a"/>
+        <text x="591" y="145" fill="#1a1304" font-size="12" font-weight="600">WICHTIG · Kontrast ungenutzt</text>
+
+        <rect x="20" y="312" width="735" height="128" fill="none" stroke="#d94f3d" stroke-width="2" stroke-dasharray="8 5" rx="3"/>
+        <text x="30" y="334" fill="#d94f3d" font-size="12" font-weight="600">KRITISCH · tote untere Hälfte (~45 %)</text>
+
+        <rect x="178" y="22" width="135" height="262" fill="none" stroke="#4fae8b" stroke-width="2.5" rx="3"/>
+        <rect x="178" y="2" width="135" height="20" fill="#4fae8b"/>
+        <text x="184" y="17" fill="#04140e" font-size="12" font-weight="600">HALTEN · starke Silhouette</text>
+      </g>
+    </svg>
+  </div>
+  <div class="legend">
+    <span class="c"><i></i>Kritisch</span>
+    <span class="w"><i></i>Wichtig</span>
+    <span class="h"><i></i>Halten</span>
+    <span class="e"><i></i>Spannungs-/Blicklinie</span>
+  </div>
+  <p class="hint">Tipp: „D1"–„D5" schalten die jeweils relevanten Ebenen automatisch. Mit den Layer-Buttons frei nachjustieren.</p>
+</section>
+
+<style>
+/* ===== Durchlauf-Sektionen ===== */
+section.run{padding:40px 26px;border-top:1px solid var(--line);scroll-margin-top:10px}
+section.run .guardian{display:flex;gap:10px;align-items:flex-start;max-width:840px;
+  border-left:3px solid var(--hold);background:rgba(79,174,139,.07);padding:11px 16px;border-radius:0 3px 3px 0;margin:14px 0 26px;font-size:14.5px;color:#cfd6d3}
+section.run .guardian b{color:var(--hold);font-family:'Oswald';text-transform:uppercase;font-size:11px;letter-spacing:.12em;white-space:nowrap;padding-top:2px}
+.run-q{font-family:'Spectral',serif;font-style:italic;font-size:18px;color:var(--smog-hi);max-width:760px;margin-bottom:6px}
+
+.visual-block{margin:8px 0 30px;border:1px solid var(--line);border-radius:4px;background:rgba(12,18,20,.45);padding:18px 18px 12px}
+.visual-block .vb-h{font-family:'Oswald';font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--terra);margin-bottom:14px}
+.visual-block svg{display:block;width:100%;height:auto;border-radius:3px}
+.vb-cap{font-size:13px;color:var(--ink-dim);margin-top:10px;font-style:italic;font-family:'Spectral',serif}
+.twin{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:680px){.twin{grid-template-columns:1fr}}
+.twin .cell{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#000}
+.twin .cell img{display:block;width:100%}
+.twin .cell .cl{font-family:'Oswald';font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 10px;color:var(--ink);background:rgba(20,29,32,.8)}
+
+/* Diagnose-Karten */
+.cards{display:flex;flex-direction:column;gap:18px;max-width:920px}
+.card{border:1px solid var(--line);border-radius:5px;overflow:hidden;background:linear-gradient(160deg,rgba(27,39,43,.55),rgba(14,21,24,.55))}
+.card .top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);gap:12px}
+.card .top .ct{font-family:'Oswald';font-size:17px;text-transform:uppercase;letter-spacing:.02em;color:var(--ink)}
+.sev{font-family:'Oswald';font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:4px 11px;border-radius:3px;white-space:nowrap}
+.sev.c{background:var(--crit);color:#180a08}
+.sev.w{background:var(--warn);color:#1a1304}
+.sev.h{background:var(--hold);color:#04140e}
+.card .body{padding:6px 16px 16px}
+.lvl{padding:13px 0;border-bottom:1px dashed var(--line)}
+.lvl:last-child{border-bottom:none}
+.lvl .lh{font-family:'Oswald';font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.lvl .lh .ic{font-size:13px}
+.lvl.diag .lh{color:var(--crit)}
+.lvl.fix .lh{color:var(--smog-hi)}
+.lvl.prin .lh{color:var(--steel)}
+.lvl.iden .lh{color:var(--hold)}
+.lvl p{font-size:15px;line-height:1.55;color:#d4dad7}
+.badge{display:inline-block;font-family:'Oswald';font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+  background:rgba(88,104,112,.22);border:1px solid var(--steel);color:var(--steel);padding:3px 9px;border-radius:3px;margin-top:8px;margin-right:6px}
+.quote{margin-top:10px;border-left:3px solid var(--smog);background:rgba(202,161,92,.08);padding:8px 14px;
+  font-family:'Spectral',serif;font-style:italic;font-size:14.5px;color:var(--smog-hi);border-radius:0 3px 3px 0}
+.quote .src{display:block;font-style:normal;font-family:'Oswald';font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel);margin-top:5px}
+.minifaz{max-width:840px;margin-top:24px;font-family:'Spectral',serif;font-size:16px;color:#cfd6d3;border-top:1px solid var(--line);padding-top:16px}
+.minifaz b{font-family:'Oswald';text-transform:uppercase;font-size:11px;letter-spacing:.14em;color:var(--terra);display:block;margin-bottom:4px;font-style:normal}
+</style>
+
+<!-- ================= DURCHLAUF 1 ================= -->
+<section class="run" id="d1">
+  <div class="sec-h"><span class="sn">01</span><h2>Lesbarkeit &amp; Aussage</h2></div>
+  <p class="run-q">Was sagt das Bild auf den ersten Blick — und trägt das Hell-Dunkel-Muster es allein?</p>
+  <div class="guardian"><b>Identitäts-Wächter</b><span>Der dämmrige Clay-Look und die zwei Farbinseln (Terrakotta / Giftgrün) bleiben — wir prüfen nur, ob das Auge sie sofort findet.</span></div>
+
+  <div class="visual-block">
+    <div class="vb-h">Visual · Notan-Reduktion (3 Werte) + Erstblick-Sprung</div>
+    <svg viewBox="0 0 775 280" xmlns="http://www.w3.org/2000/svg" font-family="Oswald">
+      <!-- schematisches Notan: dunkle Straße, mittlere Brücke, heller Gap -->
+      <rect width="775" height="280" fill="#202b2e"/>
+      <rect y="170" width="775" height="110" fill="#0e1517"/>
+      <rect width="775" height="78" fill="#192326"/>
+      <ellipse cx="660" cy="120" rx="150" ry="60" fill="#cdb079"/>
+      <ellipse cx="660" cy="120" rx="95" ry="38" fill="#e6c98a"/>
+      <!-- Vogel Masse dunkel -->
+      <path d="M210,40 C175,55 195,150 250,165 C300,150 320,60 270,42 C245,32 230,32 210,40Z" fill="#0e1517"/>
+      <!-- Grün Masse: fast gleicher Wert wie HG -> Problem -->
+      <path d="M430,120 C415,135 420,160 470,168 C520,160 525,128 505,122 C470,112 450,112 430,120Z" fill="#1c2629"/>
+      <!-- Squint-Pfeil: Auge springt zum hellen Gap, nicht zu Figuren -->
+      <path d="M120,235 C320,235 500,170 640,128" fill="none" stroke="#d94f3d" stroke-width="3" stroke-dasharray="9 6" marker-end="url(#ah)"/>
+      <circle cx="640" cy="125" r="14" fill="none" stroke="#d94f3d" stroke-width="3"/>
+      <text x="120" y="225" fill="#e6c98a" font-size="13">Erstblick startet hier…</text>
+      <text x="520" y="115" fill="#d94f3d" font-size="13">…und landet im Gap, nicht bei den Figuren</text>
+      <text x="200" y="195" fill="#9aa6a4" font-size="12">Vogel = dunkel auf mittel ✓</text>
+      <text x="408" y="195" fill="#d94f3d" font-size="12">Grün ≈ HG-Wert ✗</text>
+    </svg>
+    <div class="vb-cap">3-Wert-Reduktion: Das hellste Areal (Sonnen-Gap, rechts) zieht den Erstblick — aber dort steht keine Figur. Der Vogel trennt sich klar; die grüne Figur fällt im Notan fast mit dem Brückenschatten zusammen.</div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="top"><div class="ct">Die eine Aussage ist nicht eindeutig adressiert</div><span class="sev w">Wichtig</span></div>
+      <div class="body">
+        <div class="lvl diag"><div class="lh"><span class="ic">⊘</span>Diagnose</div><p>Zwei gleich große, gleich platzierte Figuren in der Bildmitte konkurrieren um die Aufmerksamkeit. Es ist nicht lesbar, ob die Szene vom Vogel (links, größer, heller), vom grünen Wesen oder von ihrer Begegnung erzählt. Der Betrachter zögert.</p></div>
+        <div class="lvl fix"><div class="lh"><span class="ic">→</span>Fix</div><p>Eine klare Hierarchie setzen: eine Figur als Protagonist (Größe/Wert/Platzierung), die andere klar untergeordnet — oder ihre Beziehung explizit machen (Blickkontakt, Distanzspannung).</p></div>
+        <div class="lvl prin"><div class="lh"><span class="ic">§</span>Framed-Ink-Prinzip</div><p>Jeder Shot beantwortet <em>eine</em> erzählerische Frage; Komposition soll fühlen lassen, nicht aufzählen.</p>
+          <div class="quote">„not telling, but making them feel"<span class="src">Vol. 1 · Kap. 1 · S. 15</span></div>
+          <span class="badge">V1 · Think/Feel · S.14–15</span><span class="badge">V1 · Keeping the Focal Point · S.55–56</span>
+        </div>
+        <div class="lvl iden"><div class="lh"><span class="ic">◈</span>Deine Identität</div><p>Die unheimlich-stille Tonart <em>profitiert</em> von Hierarchie: Ein dominanter Wächter im Vordergrund, der zweite als bedrohlicher Schatten dahinter, verstärkt das Beklemmende — ganz ohne die Palette zu ändern.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="top"><div class="ct">Stärkster Kontrast sitzt nicht am Fokus</div><span class="sev c">Kritisch</span></div>
+      <div class="body">
+        <div class="lvl diag"><div class="lh"><span class="ic">⊘</span>Diagnose</div><p>Der hellste Wert des Bildes — der Smog-Sonnenuntergang — liegt bei ~83 % Bildbreite, also rechts <em>neben</em> beiden Figuren. Der maximale Hell-Dunkel-Kontrast zieht das Auge dorthin, wo erzählerisch nichts passiert.</p></div>
+        <div class="lvl fix"><div class="lh"><span class="ic">→</span>Fix</div><p>Kamera leicht nach rechts schwenken oder Figur(en) nach rechts versetzen, sodass die Hauptfigur <em>vor</em> dem hellen Gap als dunkle Silhouette steht — der Kontrast arbeitet dann für den Fokus.</p></div>
+        <div class="lvl prin"><div class="lh"><span class="ic">§</span>Framed-Ink-Prinzip</div><p>Der höchste Wertkontrast gehört an den wichtigsten Punkt; Licht ist die erste Antwort auf „worauf schaue ich?".</p>
+          <span class="badge">V1 · Basic Checklist / Licht-als-Fokus · S.26–27</span><span class="badge">V1 · Chiaroscuro · S.19–20</span>
+        </div>
+        <div class="lvl iden"><div class="lh"><span class="ic">◈</span>Deine Identität</div><p>Der Fokus-Kontrast muss nicht „schön" warm sein — ein fahler Wächter als schwarze Silhouette gegen den giftig-goldenen Smog setzt denselben Eye-Lead und verstärkt sogar das Endzeit-Gefühl.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="minifaz"><b>Mini-Fazit → D2</b>Das Notan trägt nur zur Hälfte: der Vogel ja, die grüne Figur und der Fokus nicht. Bevor wir Linien führen, muss klar sein, <em>wohin</em> — also schauen wir als Nächstes, welchen Pfad das Auge tatsächlich nimmt.</div>
+</section>
+
+<!-- ================= DURCHLAUF 2 ================= -->
+<section class="run" id="d2">
+  <div class="sec-h"><span class="sn">02</span><h2>Blickführung &amp; Komposition-Flow</h2></div>
+  <p class="run-q">Wohin führe ich das Auge — und wohin führt es tatsächlich?</p>
+  <div class="guardian"><b>Identitäts-Wächter</b><span>Wir ändern keine Farbe und kein Wesen — wir prüfen die unsichtbaren Linien, die der Render bereits erzeugt.</span></div>
+
+  <div class="visual-block">
+    <div class="vb-h">Visual · Eye-Lead-Pfad + Lines of Tension</div>
+    <svg viewBox="0 0 775 300" xmlns="http://www.w3.org/2000/svg" font-family="Oswald">
+      <rect width="775" height="300" fill="#10181a"/>
+      <!-- schematische Bildmarken -->
+      <rect width="775" height="70" fill="#1a2427" opacity=".7"/>
+      <ellipse cx="660" cy="150" rx="120" ry="48" fill="#3a3422" opacity=".8"/>
+      <circle cx="250" cy="90" r="30" fill="#7d4630"/>
+      <circle cx="470" cy="150" r="26" fill="#26442a"/>
+      <!-- Ist-Flow: gestaucht in Mitte, kippt nach rechts raus -->
+      <path d="M250,90 C330,150 420,165 470,150 S630,170 700,165" fill="none" stroke="#e6c98a" stroke-width="3" marker-end="url(#ah)"/>
+      <text x="708" y="160" fill="#d94f3d" font-size="13">↘ kippt rechts aus dem Bild</text>
+      <!-- Tension ins Leere -->
+      <line x1="250" y1="70" x2="500" y2="120" stroke="#d8a13a" stroke-width="2" stroke-dasharray="7 5"/>
+      <text x="300" y="60" fill="#d8a13a" font-size="12">Vogel-Blick zielt ins Leere →</text>
+      <!-- fehlender Rückführungsbogen -->
+      <path d="M700,200 C500,260 300,250 130,210" fill="none" stroke="#4fae8b" stroke-width="2" stroke-dasharray="3 6" opacity=".5"/>
+      <text x="300" y="245" fill="#4fae8b" font-size="12" opacity=".8">…hier fehlt eine Rückführung (Z/2-Schleife)</text>
+      <circle cx="250" cy="90" r="13" fill="#e6c98a"/><text x="246" y="95" fill="#0c1214" font-weight="700">1</text>
+      <circle cx="470" cy="150" r="13" fill="#e6c98a"/><text x="466" y="155" fill="#0c1214" font-weight="700">2</text>
+      <circle cx="700" cy="165" r="13" fill="#d94f3d"/><text x="696" y="170" fill="#fff" font-weight="700">3</text>
+    </svg>
+    <div class="vb-cap">Der Blick startet beim helleren Vogel (1), rutscht zur grünen Figur (2) und kippt dann mit der Brücken-Diagonale rechts aus dem Bild (3). Es fehlt eine Flussform (Z oder 2), die das Auge in die Szene <em>zurückholt</em>.</div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="top"><div class="ct">Der Blick verlässt das Bild rechts</div><span class="sev c">Kritisch</span></div>
+      <div class="body">
+        <div class="lvl diag"><div class="lh"><span class="ic">⊘</span>Diagnose</div><p>Brückenunterkante, Leitplanke und der helle Sonnen-Gap bilden gemeinsam eine starke Diagonale, die nach rechts unten aus dem Frame zeigt. Nichts führt den Blick zurück — die Komposition „leckt" an der rechten Kante.</p></div>
+        <div class="lvl fix"><div class="lh"><span class="ic">→</span>Fix</div><p>Ein Rückführungselement rechts setzen (Brückenpfeiler, Schild, eine zur Szene gewandte Figurenhaltung) oder die Komposition als flache „2"/„Z" anlegen, deren Endpunkt wieder zur Hauptfigur weist.</p></div>
+        <div class="lvl prin"><div class="lh"><span class="ic">§</span>Framed-Ink-Prinzip</div><p>Eine Komposition lebt von einem bewussten, natürlichen Fluss — oft über eine große Z- oder 2-Form aufgebaut, der das Auge folgt.</p>
+          <div class="quote">„a meaningful and natural flow"<span class="src">Vol. 2 · Kap. 3 · S. 34</span></div>
+          <span class="badge">V2 · Composition Flow · K3 / S.34–42</span>
+        </div>
+        <div class="lvl iden"><div class="lh"><span class="ic">◈</span>Deine Identität</div><p>Ein Brückenpfeiler rechts als dunkler Rahmen passt perfekt zur Infrastruktur-Erzählung — er hält den Blick drin <em>und</em> verstärkt die Einklemmung der Wesen in der Zone.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="top"><div class="ct">Spannungslinien zielen ins Leere</div><span class="sev w">Wichtig</span></div>
+      <div class="body">
+        <div class="lvl diag"><div class="lh"><span class="ic">⊘</span>Diagnose</div><p>Die Blickrichtung des Vogels (Kopf nach rechts/vorn geneigt) erzeugt eine implizite Linie — die aber auf leeren Raum zwischen den Figuren und dem Gap trifft. Das implizite Dreieck Kopf–Kopf–Gap hat keine Spitze auf einem bedeutungstragenden Element.</p></div>
+        <div class="lvl fix"><div class="lh"><span class="ic">→</span>Fix</div><p>Die Figuren so ausrichten, dass ihre Blick-/Körperlinien sich treffen (Begegnung) oder gemeinsam auf den Fokus zeigen. Spannungslinien sollen Dreiecke bilden, deren Ecken auf Schlüsselpunkten sitzen.</p></div>
+        <div class="lvl prin"><div class="lh"><span class="ic">§</span>Framed-Ink-Prinzip</div><p>Implizite Linien zwischen Elementen spannen den Frame auf und bilden dynamische Dreiecke; je näher an der Kante, desto höher die Spannung.</p>
+          <span class="badge">V2 · Lines of Tension · S.20–21</span><span class="badge">V1 · Keeping the Focal Point · S.55–56</span>
+        </div>
+        <div class="lvl iden"><div class="lh"><span class="ic">◈</span>Deine Identität</div><p>Lässt du die Wesen sich gegenseitig anblicken, entsteht eine geschlossene Spannung zwischen ihnen — unheimlicher als das jetzige Nebeneinander, und die Tonart bleibt exakt erhalten.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="minifaz"><b>Mini-Fazit → D3</b>Der Fluss ist da, aber er entweicht. Wenn wir wissen, dass der Blick gehalten werden muss, stellt sich die Frage, <em>wo im Rahmen</em> die Energie sitzt — das prüfen wir als Nächstes über Kompression &amp; Release.</div>
+</section>
+
+<!-- ================= DURCHLAUF 3 ================= -->
+<section class="run" id="d3">
+  <div class="sec-h"><span class="sn">03</span><h2>Frame-Energie &amp; Bildaufteilung</h2></div>
+  <p class="run-q">Wo sitzt die Energie im Rahmen — und ist die Flächenaufteilung gewollt?</p>
+  <div class="guardian"><b>Identitäts-Wächter</b><span>Die Stimmung der weiten, leeren Zone ist Teil der Seele — wir fragen nur, ob die Leere <em>arbeitet</em> oder nur Fläche ist.</span></div>
+
+  <div class="visual-block">
+    <div class="vb-h">Visual · Game-Field (Kompression/Release) + Drittel-Raster</div>
+    <svg viewBox="0 0 775 300" xmlns="http://www.w3.org/2000/svg" font-family="Oswald">
+      <rect width="775" height="300" fill="#10181a"/>
+      <rect width="775" height="200" fill="#4fae8b" opacity=".10"/>
+      <rect y="200" width="775" height="100" fill="#d94f3d" opacity=".15"/>
+      <!-- Drittel -->
+      <g stroke="#e6c98a" stroke-width="1" stroke-dasharray="5 5" opacity=".5">
+        <line x1="258" y1="0" x2="258" y2="300"/><line x1="517" y1="0" x2="517" y2="300"/>
+        <line x1="0" y1="100" x2="775" y2="100"/><line x1="0" y1="200" x2="775" y2="200"/>
+      </g>
+      <!-- Figuren-Cluster zentriert = Kompression in einem schmalen Band -->
+      <rect x="300" y="55" width="230" height="130" fill="none" stroke="#d8a13a" stroke-width="2.5" stroke-dasharray="6 4"/>
+      <text x="305" y="48" fill="#d8a13a" font-size="12">beide Figuren in 1 Mittelband gestaucht</text>
+      <ellipse cx="370" cy="120" rx="35" ry="55" fill="#7d4630"/>
+      <ellipse cx="470" cy="135" rx="32" ry="42" fill="#26442a"/>
+      <text x="20" y="35" fill="#4fae8b" font-size="14" font-weight="600">RELEASE (oben)</text>
+      <text x="20" y="285" fill="#d94f3d" font-size="14" font-weight="600">TOTE ZONE · ~45 % Asphalt ohne Funktion</text>
+      <circle cx="258" cy="200" r="4" fill="#e6c98a"/><circle cx="517" cy="200" r="4" fill="#e6c98a"/>
+      <text x="525" y="215" fill="#e6c98a" font-size="11">untere Power-Points: ungenutzt</text>
+    </svg>
+    <div class="vb-cap">Beide Figuren kleben in einem schmalen horizontalen Mittelband (Balance = statisch). Die obere Hälfte ist Release, die untere ~45 % ist eine tote Asphaltfläche ohne Erzählwert. Keine Kompression an einer Kante = kein Drama im Frame.</div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="top"><div class="ct">Tote untere Bildhälfte (~45 %)</div><span class="sev c">Kritisch</span></div>
+      <div class="body">
+        <div class="lvl diag"><div class="lh"><span class="ic">⊘</span>Diagnose</div><p>Von ~67 % Höhe abwärts ist nur strukturloser, dunkler Asphalt — knapp die Hälfte des Bildes trägt keine Information. Die mittlere Luminanz fällt im unteren Band auf ~45 (vs. ~66 oben), ohne dass dort etwas passiert.</p></div>
+        <div class="lvl fix"><div class="lh"><span class="ic">→</span>Fix</div><p>Drei Optionen: (a) auf ~2.0–2.35:1 beschneiden und die tote Fläche wegnehmen; (b) den Boden aktivieren (lange Schatten der Wesen Richtung Kamera, Pfütze mit Spiegelung, Risse); (c) Kamera tiefer setzen, sodass die Wesen den Himmel/Gap überragen.</p></div>
+        <div class="lvl prin"><div class="lh"><span class="ic">§</span>Framed-Ink-Prinzip</div><p>Leerraum muss aktiv erzählen (Isolation, Spannung) — sonst ist er nur ungenutzte Fläche. Re-Framing ändert die Energie, ohne den Moment zu verlieren.</p>
+          <span class="badge">V1 · Using the Negative Space · S.42–44</span><span class="badge">V2 · Aspect-Ratio-Mechanik · K5 / S.55–64</span>
+        </div>
+        <div class="lvl iden"><div class="lh"><span class="ic">◈</span>Deine Identität</div><p>Lange, dünne Schatten der Wesen über den nassen Asphalt zur Kamera hin würden die Leere zu <em>aktiver</em> Isolation machen — perfekt für die unheimliche Dämmerung, statt sie aufzugeben.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="top"><div class="ct">Zentrale Platzierung = statische Balance</div><span class="sev w">Wichtig</span></div>
+      <div class="body">
+        <div class="lvl diag"><div class="lh"><span class="ic">⊘</span>Diagnose</div><p>Beide Figuren sitzen im horizontalen wie vertikalen Mittelband. Keine Figur nähert sich einer Kante, also entsteht keine Kompression der „Luft" — die Komposition ruht zu sehr, das latent Bedrohliche bleibt ungenutzt.</p></div>
+        <div class="lvl fix"><div class="lh"><span class="ic">→</span>Fix</div><p>Die Hauptfigur näher an eine Rahmenkante rücken (oder größer ins Bild ragen lassen), damit die Luft auf einer Seite staucht und auf der anderen Spannung freisetzt. Schlüsselpunkte auf die Drittellinien legen.</p></div>
+        <div class="lvl prin"><div class="lh"><span class="ic">§</span>Framed-Ink-Prinzip</div><p>Das Panel ist ein „game field": Schiebt man das Subjekt zur Kante, komprimiert die Luft und erzeugt einen instinktiven Auflösungsdrang — das ist Drama.</p>
+          <div class="quote">„the energy within"<span class="src">Vol. 2 · Kap. 1 · S. 14</span></div>
+          <span class="badge">V2 · Compression &amp; Release · S.13–14</span><span class="badge">V2 · Release/Pressure Zone · S.18</span><span class="badge">V2 · Splitting the Screen · K7 / S.72–89</span>
+        </div>
+        <div class="lvl iden"><div class="lh"><span class="ic">◈</span>Deine Identität</div><p>Der Vogel groß und kantennah, das grüne Wesen klein und tief im Mittelgrund — diese Asymmetrie steigert das Unbehagen, ohne einen einzigen Farbwert zu verändern.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="minifaz"><b>Mini-Fazit → D4</b>Die Energie ist in der Mitte gefangen und die Leere ungenutzt. Sobald wir die Figuren neu setzen, müssen sie sich auch <em>lesen</em> — also prüfen wir Silhouette, Trennung, Tiefe und Licht.</div>
+</section>
+
+<!-- ================= DURCHLAUF 4 ================= -->
+<section class="run" id="d4">
+  <div class="sec-h"><span class="sn">04</span><h2>Silhouette · Tiefe · Kamera · Licht</h2></div>
+  <p class="run-q">Liest sich jede Form? Stützt Kamera, Licht und Tiefe die Emotion?</p>
+  <div class="guardian"><b>Identitäts-Wächter</b><span>Die organischen Volumen und der harte Beton sind die Handschrift — wir sorgen nur dafür, dass beide Wesen klar ablesbar bleiben.</span></div>
+
+  <div class="visual-block">
+    <div class="vb-h">Visual · Silhouetten-/Separations-Check + Tiefen-Ebenen</div>
+    <div class="twin">
+      <div class="cell">
+        <svg viewBox="0 0 380 230" xmlns="http://www.w3.org/2000/svg" font-family="Oswald">
+          <rect width="380" height="230" fill="#1a2427"/>
+          <!-- Vogel klar -->
+          <path d="M95,28 C70,40 82,120 120,140 C95,155 100,205 150,210 C200,205 205,150 180,138 C218,118 230,40 200,30 C170,18 120,18 95,28Z" fill="#0c1214" stroke="#4fae8b" stroke-width="2.5"/>
+          <text x="80" y="225" fill="#4fae8b" font-size="12">Vogel — liest sich ✓</text>
+          <!-- Grün auf gleichem Dunkel -> verschwindet -->
+          <path d="M255,70 C238,82 244,150 258,180 C290,205 340,205 352,180 C362,150 360,80 338,72 C310,60 275,60 255,70Z" fill="#141d20" stroke="#d94f3d" stroke-width="2.5" stroke-dasharray="6 4"/>
+          <text x="250" y="225" fill="#d94f3d" font-size="12">Grün — verschmilzt ✗</text>
+        </svg>
+        <div class="cl">Silhouetten-Test</div>
+      </div>
+      <div class="cell">
+        <svg viewBox="0 0 380 230" xmlns="http://www.w3.org/2000/svg" font-family="Oswald">
+          <rect width="380" height="230" fill="#0e1517"/>
+          <rect y="150" width="380" height="80" fill="#1c2629"/>
+          <text x="14" y="175" fill="#7d4630" font-size="13" font-weight="600">VG · Vogel (scharf, warm)</text>
+          <rect x="14" y="182" width="120" height="6" fill="#7d4630"/>
+          <text x="14" y="205" fill="#26442a" font-size="13" font-weight="600">MG · grünes Wesen (verliert sich)</text>
+          <rect x="14" y="212" width="80" height="6" fill="#26442a"/>
+          <text x="200" y="40" fill="#586870" font-size="13" font-weight="600">HG · Brücke + Gap</text>
+          <rect x="200" y="48" width="150" height="6" fill="#586870"/>
+          <text x="200" y="95" fill="#caa15c" font-size="12">atmosph. Tiefe vorhanden ✓</text>
+        </svg>
+        <div class="cl">VG / MG / HG</div>
+      </div>
+    </div>
+    <div class="vb-cap">Die VG/MG/HG-Staffelung (Wesen → Brücke → leuchtender Gap) ist eine echte Stärke — die atmosphärische Tiefe sitzt. Im Silhouetten-Test bricht jedoch die grüne Figur weg: gegen den dunklen Brückenschatten verliert sie ihre Kontur.</div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="top"><div class="ct">Grüne Figur verschmilzt mit dem Hintergrund</div><span class="sev c">Kritisch</span></div>
+      <div class="body">
+        <div class="lvl diag"><div class="lh"><span class="ic">⊘</span>Diagnose</div><p>Gemessen liegt die grüne Figur (RGB ~33/62/32) tonal extrem nah am Brückenschatten dahinter — beide sind dunkel und entsättigt. Die rechte Kontur des Wesens löst sich auf; als Silhouette ist es nicht mehr lesbar.</p></div>
+        <div class="lvl fix"><div class="lh"><span class="ic">→</span>Fix</div><p>Separation über drei Hebel: (1) einen helleren HG-Streifen (Gap-Licht) hinter die rechte Kontur ziehen; (2) ein schwaches Rim-Light auf der dem Sonnenuntergang zugewandten Seite; (3) Overlap nutzen — das Wesen klar vor eine kontrastierende Fläche setzen.</p></div>
+        <div class="lvl prin"><div class="lh"><span class="ic">§</span>Framed-Ink-Prinzip</div><p>Lesbarkeit beginnt bei der Silhouette; eine Figur, die im Hintergrund versinkt, erzählt nicht. Werte/Kanten/Overlap trennen die Ebenen.</p>
+          <span class="badge">V1 · Overall Silhouette · K5 / S.96–105</span><span class="badge">V2 · Silhouetting · S.28–29</span>
+        </div>
+        <div class="lvl iden"><div class="lh"><span class="ic">◈</span>Deine Identität</div><p>Ein fahles, kaltes Rim-Light vom Gegenlicht — kein warmes Studiolicht — trennt die Figur und passt zur giftig-dämmrigen Stimmung. Die Seele bleibt, die Form wird lesbar.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="top"><div class="ct">Kamera &amp; Tiefe — eine echte Stärke</div><span class="sev h">Halten</span></div>
+      <div class="body">
+        <div class="lvl diag"><div class="lh"><span class="ic">✓</span>Befund</div><p>Die leichte Untersicht (tiefe Kameraposition, Asphalt im Vordergrund, Wesen ragen vor Brücke/Himmel) gibt den Kreaturen Präsenz und eine leise Bedrohlichkeit. Die Staffelung Asphalt → Wesen → Brücke → leuchtender Horizont erzeugt überzeugende atmosphärische Tiefe.</p></div>
+        <div class="lvl fix"><div class="lh"><span class="ic">→</span>Ausbauen</div><p>Diese Stärke bewusst verstärken: die Untersicht etwas konsequenter machen (Wesen brechen die Brückenlinie / ragen in den Himmel), damit „overpowering upshot" voll greift.</p></div>
+        <div class="lvl prin"><div class="lh"><span class="ic">§</span>Framed-Ink-Prinzip</div><p>Untersicht erzeugt Macht/Bedrohung; Kamerahöhe ist ein Emotions-Werkzeug. Tiefe entsteht durch VG/MG/HG plus atmosphärische Staffelung.</p>
+          <span class="badge">V1 · Overpowering Upshots · S.41–42</span><span class="badge">V1 · Lenses · S.28–31</span><span class="badge">V2 · Sense of Depth · S.19</span>
+        </div>
+        <div class="lvl iden"><div class="lh"><span class="ic">◈</span>Deine Identität</div><p>Genau dieser tiefe, beklemmende Blickwinkel <em>ist</em> die Tonart. Hier nichts überschreiben — nur schärfen.</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="top"><div class="ct">Form-Sprache stützt die Stimmung</div><span class="sev h">Halten</span></div>
+      <div class="body">
+        <div class="lvl diag"><div class="lh"><span class="ic">✓</span>Befund</div><p>Beide Wesen bestehen aus runden, weichen Volumen — das liest sich als „organisch / lebendig / nicht eindeutig feindlich" und erzeugt das Unheimlich-Skurrile statt offener Aggression. Die runde Form-Sprache passt zur ambivalenten Tonart.</p></div>
+        <div class="lvl fix"><div class="lh"><span class="ic">→</span>Halten</div><p>Beibehalten. Wenn mehr Bedrohung gewünscht ist, punktuell eine eckige/spitze Akzentform einführen (Schatten, Silhouettenspitze) — nicht die Grundform ändern.</p></div>
+        <div class="lvl prin"><div class="lh"><span class="ic">§</span>Framed-Ink-Prinzip</div><p>Runde/weiche Formen wirken ruhig/organisch, eckige/spitze wirken aggressiv/spannungsgeladen — die Form-Sprache trägt die Emotion der Figur.</p>
+          <span class="badge">V1 · Dynamics of Expression · S.102–105</span><span class="badge">V1 · Angular vs. Curved · S.47–48</span>
+        </div>
+        <div class="lvl iden"><div class="lh"><span class="ic">◈</span>Deine Identität</div><p>Die weiche Skurrilität ist Teil deiner Handschrift — sie macht die Szene gerade <em>nicht</em> zum Standard-Monsterbild. Bewahren.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="minifaz"><b>Mini-Fazit → D5</b>Die Bausteine sind stark (Tiefe, Untersicht, Form-Sprache); die Schwächen sind lösbar (Separation, Fokus, Leere). Jetzt führen wir alles zu einer optimierten Fassung in deiner Tonart zusammen.</div>
+</section>
+
+<!-- ================= DURCHLAUF 5 ================= -->
+<section class="run" id="d5">
+  <div class="sec-h"><span class="sn">05</span><h2>Synthese — optimierte Komposition &amp; Inspiration</h2></div>
+  <p class="run-q">Wie sieht die nach allen Prinzipien optimierte Fassung in DEINER Tonart aus — und welche Alternativen lohnen sich?</p>
+  <div class="guardian"><b>Identitäts-Wächter</b><span>Jeder Vorschlag bleibt im selben dämmrigen Clay-Look mit Terrakotta &amp; Giftgrün — die Eingriffe sind Komposition, nicht Stil.</span></div>
+
+  <div class="visual-block">
+    <div class="vb-h">Visual · Before / After-Kompositionsskizze (eigene Palette)</div>
+    <div class="twin">
+      <div class="cell">
+        <svg viewBox="0 0 380 222" xmlns="http://www.w3.org/2000/svg" font-family="Oswald">
+          <defs><linearGradient id="skyA" x1="0" x2="1"><stop offset="0" stop-color="#586870"/><stop offset="1" stop-color="#caa15c"/></linearGradient></defs>
+          <rect width="380" height="222" fill="url(#skyA)" opacity=".5"/>
+          <rect y="78" width="380" height="20" fill="#3a4548"/>
+          <rect y="135" width="380" height="87" fill="#0e1517"/>
+          <ellipse cx="300" cy="95" rx="70" ry="26" fill="#e6c98a" opacity=".8"/>
+          <ellipse cx="120" cy="118" rx="30" ry="45" fill="#7d4630"/>
+          <ellipse cx="200" cy="125" rx="26" ry="36" fill="#26442a"/>
+          <path d="M120,90 C200,150 280,140 320,110" fill="none" stroke="#e6c98a" stroke-width="2.5" marker-end="url(#ah)"/>
+          <text x="14" y="20" fill="#fff" font-size="13" font-weight="600">IST</text>
+          <text x="40" y="210" fill="#d94f3d" font-size="11">zentriert · Blick kippt raus · ½ tot</text>
+        </svg>
+        <div class="cl">Ist-Zustand</div>
+      </div>
+      <div class="cell">
+        <svg viewBox="0 0 380 222" xmlns="http://www.w3.org/2000/svg" font-family="Oswald">
+          <defs><linearGradient id="skyB" x1="0" x2="1"><stop offset="0" stop-color="#586870"/><stop offset="1" stop-color="#e6c98a"/></linearGradient></defs>
+          <rect width="380" height="222" fill="url(#skyB)" opacity=".55"/>
+          <rect y="92" width="380" height="22" fill="#3a4548"/>
+          <rect y="150" width="380" height="72" fill="#0e1517"/>
+          <!-- heller Gap hinter Hauptfigur -->
+          <ellipse cx="250" cy="120" rx="95" ry="40" fill="#e6c98a" opacity=".85"/>
+          <!-- Hauptfigur (Vogel) groß, rechtes Drittel, vor Gap als Silhouette -->
+          <path d="M235,40 C205,55 215,150 250,165 C285,150 300,55 268,42 C255,32 250,32 235,40Z" fill="#1a0f08"/>
+          <!-- Rim-Light Andeutung -->
+          <path d="M268,42 C300,55 290,150 252,165" fill="none" stroke="#e6c98a" stroke-width="1.5" opacity=".7"/>
+          <!-- grünes Wesen klein, tiefer, links als Gegenpol -->
+          <ellipse cx="110" cy="138" rx="22" ry="30" fill="#26442a"/>
+          <path d="M110,112 C90,120 95,150 130,150" fill="none" stroke="#4fae8b" stroke-width="1" opacity=".5"/>
+          <!-- lange Schatten aktivieren Boden -->
+          <path d="M250,165 L150,222 M250,165 L320,222" stroke="#000" stroke-width="6" opacity=".5"/>
+          <path d="M110,150 L70,222" stroke="#000" stroke-width="4" opacity=".4"/>
+          <!-- Z-Flow zurück -->
+          <path d="M110,120 C180,150 230,150 250,120" fill="none" stroke="#e6c98a" stroke-width="2.5" marker-end="url(#ah)"/>
+          <!-- Drittellinien -->
+          <g stroke="#fff" stroke-width=".6" stroke-dasharray="4 4" opacity=".35"><line x1="253" y1="0" x2="253" y2="222"/><line x1="127" y1="0" x2="127" y2="222"/></g>
+          <text x="14" y="20" fill="#fff" font-size="13" font-weight="600">VORSCHLAG</text>
+          <text x="20" y="210" fill="#4fae8b" font-size="10.5">Fokus vor Gap · Gegenpol · Boden lebt · Flow kehrt zurück</text>
+        </svg>
+        <div class="cl">Optimierte Komposition</div>
+      </div>
+    </div>
+    <div class="vb-cap">Vorschlag in deiner Palette: Der Vogel wird zur dunklen Hauptsilhouette <em>vor</em> den hellen Gap (rechtes Drittel) gezogen — maximaler Kontrast trägt jetzt den Fokus. Das grüne Wesen wird kleiner, tiefer, links als Gegenpol mit fahlem Rim-Light. Lange Schatten aktivieren den Boden, ein Z-Flow holt den Blick zurück. Tonart, Farben und Clay-Look unverändert.</div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="top"><div class="ct">Priorisierte Zusammenführung</div><span class="sev c">Synthese</span></div>
+      <div class="body">
+        <div class="lvl diag"><div class="lh"><span class="ic">⊘</span>Was bleibt (Seele)</div><p>Dämmerungs-Palette, untexturierter Clay-Render, runde Wesen, Untersicht, atmosphärische VG/MG/HG-Tiefe, Infrastruktur-Thema. Das ist die Identität und wird nicht angetastet.</p></div>
+        <div class="lvl fix"><div class="lh"><span class="ic">→</span>Was sich ändert (Komposition)</div><p>1) Hauptfigur vor den Gap (Fokus + Kontrast). 2) Grüne Figur separieren (Rim-Light/HG-Aufhellung). 3) Untere Leere beschneiden oder mit Schatten aktivieren. 4) Z-Flow mit Rückführung rechts. 5) Asymmetrische Größen für Frame-Energie.</p></div>
+        <div class="lvl prin"><div class="lh"><span class="ic">§</span>Framed-Ink-Prinzip</div><p>Der mustergültige Prozess: Aussage → Notan → Flow/Tension → finale Komposition; zum Höhepunkt hin werden die Formen bewusst dynamischer.</p>
+          <span class="badge">V2 · Process &amp; Gallery Analysis · K10 / S.113–125</span><span class="badge">V1 · Ramping up / Climax · S.76–79</span>
+        </div>
+        <div class="lvl iden"><div class="lh"><span class="ic">◈</span>Deine Identität</div><p>Jeder Eingriff ist rein kompositorisch und in deiner Farbwelt umsetzbar. Das Ergebnis ist dasselbe Bild — nur mit klarem Fokus und gehaltenem Blick.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="minifaz"><b>Mini-Fazit</b>Die Optimierung ist additiv, nicht ersetzend: Stärken schärfen, drei Schwächen beheben. Die folgenden Shot-Designs sind <em>Angebote</em> für Version 2.</div>
+</section>
+
+<style>
+section.block{padding:42px 26px;border-top:1px solid var(--line)}
+.notan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1000px;margin-top:6px}
+@media(max-width:760px){.notan-grid{grid-template-columns:1fr}}
+.notan-cell{border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#000}
+.notan-cell img,.notan-cell svg{display:block;width:100%}
+.notan-cell .nc{font-family:'Oswald';font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;background:rgba(20,29,32,.85);color:var(--ink)}
+.notan-cell .nc small{display:block;color:var(--ink-dim);font-size:10.5px;letter-spacing:.04em;text-transform:none;margin-top:2px;font-family:'Archivo Narrow'}
+
+.inspo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1000px;margin-top:8px}
+@media(max-width:820px){.inspo-grid{grid-template-columns:1fr}}
+.inspo{border:1px solid var(--line);border-radius:5px;overflow:hidden;background:linear-gradient(160deg,rgba(27,39,43,.5),rgba(14,21,24,.5))}
+.inspo svg{display:block;width:100%}
+.inspo .it{padding:14px 15px}
+.inspo .it .h{font-family:'Oswald';font-size:15px;text-transform:uppercase;color:var(--terra);margin-bottom:6px}
+.inspo .it p{font-size:14px;color:#cfd6d3;line-height:1.5}
+.inspo .it .badge{margin-top:9px}
+.offer-note{max-width:760px;font-family:'Spectral',serif;font-style:italic;color:var(--smog-hi);margin:4px 0 22px;font-size:16px}
+
+/* Plan-Checkliste */
+.plan{max-width:920px;margin-top:6px;display:flex;flex-direction:column;gap:10px}
+.step{display:flex;gap:14px;border:1px solid var(--line);border-left-width:4px;border-radius:4px;padding:14px 16px;background:rgba(20,29,32,.45);cursor:pointer;transition:.15s}
+.step:hover{background:rgba(27,39,43,.7)}
+.step.c{border-left-color:var(--crit)}.step.w{border-left-color:var(--warn)}.step.h{border-left-color:var(--hold)}
+.step .box{width:22px;height:22px;border:2px solid var(--steel);border-radius:4px;flex:0 0 auto;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--hold);transition:.15s}
+.step.done .box{background:var(--hold);border-color:var(--hold);color:#04140e}
+.step.done .txt{opacity:.5;text-decoration:line-through}
+.step .txt .h{font-family:'Oswald';font-size:15px;text-transform:uppercase;color:var(--ink);margin-bottom:3px;display:flex;align-items:center;gap:10px}
+.step .txt .sev{font-size:9.5px;padding:3px 8px}
+.step .txt p{font-size:14.5px;color:#cfd6d3}
+.step .txt .badge{margin-top:7px}
+.step .txt .iden{font-size:13px;color:var(--hold);margin-top:6px;font-style:italic;font-family:'Spectral',serif}
+.plan-progress{font-family:'Oswald';font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--smog);margin-top:14px}
+
+/* Quellen */
+.src-list{max-width:900px;columns:2;column-gap:30px;margin-top:6px}
+@media(max-width:680px){.src-list{columns:1}}
+.src-list div{break-inside:avoid;font-size:13.5px;color:var(--ink-dim);padding:5px 0;border-bottom:1px solid var(--line)}
+.src-list div b{color:var(--steel);font-family:'Oswald';font-size:12px;letter-spacing:.04em}
+.copyright-note{max-width:820px;margin-top:18px;font-size:12.5px;color:var(--steel);font-style:italic;font-family:'Spectral',serif;line-height:1.5}
+
+/* Glossar-Tooltip */
+.gl{border-bottom:1px dotted var(--smog);cursor:help;position:relative}
+.gl:hover::after{content:attr(data-tip);position:absolute;left:0;bottom:130%;width:240px;background:#0c1214;border:1px solid var(--smog);
+  color:#d4dad7;font-family:'Archivo Narrow';font-style:normal;font-size:12.5px;line-height:1.4;padding:9px 11px;border-radius:4px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+
+footer{padding:40px 26px 60px;border-top:1px solid var(--line);color:var(--steel);font-size:13px;font-family:'Oswald';letter-spacing:.06em;text-transform:uppercase}
+footer .big{font-family:'Spectral',serif;font-style:italic;font-size:17px;color:var(--smog-hi);text-transform:none;letter-spacing:0;margin-bottom:14px}
+</style>
+
+<!-- ===== NOTAN-VERGLEICH ===== -->
+<section class="block" id="notan">
+  <div class="sec-h"><span class="sn">◧</span><h2>Notan- &amp; Tonwert-Vergleich</h2></div>
+  <p class="sec-sub">Links die tatsächliche <span class="gl" data-tip="Notan = die Komposition auf 2–3 Hell-Dunkel-Werte reduziert. Trägt das Muster allein, trägt das Bild. V1 S.23–24.">Notan-Reduktion</span> des Renders. Mitte: dieselbe Logik als Ziel — Hauptfigur als dunkle Masse vor dem hellen Gap. Rechts: das Ziel-Kontrastprinzip in deiner eigenen Palette.</p>
+  <div class="notan-grid">
+    <div class="notan-cell">
+      <img alt="Ist-Notan 3 Werte" src="data:image/png;base64,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">
+      <div class="nc">Ist-Notan (3 Werte)<small>Hellster Punkt rechts, Figuren zentral-dunkel, grüne Figur kaum getrennt.</small></div>
+    </div>
+    <div class="notan-cell">
+      <svg viewBox="0 0 387 226" xmlns="http://www.w3.org/2000/svg">
+        <rect width="387" height="226" fill="#7d7d7d"/>
+        <rect y="118" width="387" height="108" fill="#161616"/>
+        <rect width="387" height="58" fill="#3a3a3a"/>
+        <ellipse cx="270" cy="118" rx="100" ry="44" fill="#ededed"/>
+        <!-- Hauptfigur dunkel vor hell -->
+        <path d="M245,40 C215,55 225,150 262,165 C300,150 312,52 278,42 C262,32 258,32 245,40Z" fill="#161616"/>
+        <!-- Gegenpol klein links, klar getrennt durch helleren Saum -->
+        <ellipse cx="110" cy="135" rx="24" ry="33" fill="#161616"/>
+        <ellipse cx="110" cy="135" rx="30" ry="40" fill="none" stroke="#ededed" stroke-width="2"/>
+      </svg>
+      <div class="nc">Ziel-Notan (Framed-Ink-Logik)<small>Dunkle Hauptmasse vor hellstem Wert, klar getrennter Gegenpol.</small></div>
+    </div>
+    <div class="notan-cell">
+      <svg viewBox="0 0 387 226" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="own" x1="0" x2="1"><stop offset="0" stop-color="#586870"/><stop offset=".6" stop-color="#caa15c"/><stop offset="1" stop-color="#e6c98a"/></linearGradient></defs>
+        <rect width="387" height="226" fill="url(#own)" opacity=".7"/>
+        <rect y="118" width="387" height="108" fill="#0e1517"/>
+        <rect width="387" height="55" fill="#2c3a3d"/>
+        <ellipse cx="270" cy="115" rx="95" ry="40" fill="#e6c98a" opacity=".9"/>
+        <path d="M245,38 C215,53 225,150 262,165 C300,150 312,50 278,40 C262,30 258,30 245,38Z" fill="#1a0f08"/>
+        <path d="M278,40 C312,50 300,150 264,165" fill="none" stroke="#e6c98a" stroke-width="1.5" opacity=".7"/>
+        <ellipse cx="110" cy="135" rx="22" ry="31" fill="#26442a"/>
+        <path d="M110,108 C90,118 95,150 132,150" fill="none" stroke="#4fae8b" stroke-width="1.2" opacity=".6"/>
+      </svg>
+      <div class="nc">Ziel-Notan in deinen Farben<small>Gleiches Kontrastprinzip, deine Dämmerungs-Palette &amp; Clay-Look.</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INSPIRATIONS-GALERIE ===== -->
+<section class="block" id="inspo">
+  <div class="sec-h"><span class="sn">✦</span><h2>Inspirations-Galerie · Shot-Designs für Version 2</h2></div>
+  <p class="offer-note">Drei alternative Stagings — ausdrücklich <b>Angebote, keine Vorschriften</b>. Jedes verändert die Erzählung anders; die Tonart bleibt überall erhalten.</p>
+  <div class="inspo-grid">
+    <div class="inspo">
+      <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#2c3a3d"/><stop offset="1" stop-color="#caa15c"/></linearGradient></defs>
+        <rect width="320" height="180" fill="url(#g1)" opacity=".6"/>
+        <rect y="70" width="320" height="16" fill="#3a4548"/>
+        <rect y="120" width="320" height="60" fill="#0e1517"/>
+        <ellipse cx="200" cy="95" rx="70" ry="26" fill="#e6c98a" opacity=".8"/>
+        <path d="M150,28 C120,45 130,150 168,168 C206,150 218,45 184,30 C168,18 165,18 150,28Z" fill="#160c06"/>
+        <path d="M184,30 C218,45 206,150 170,168" fill="none" stroke="#e6c98a" stroke-width="1.4" opacity=".7"/>
+      </svg>
+      <div class="it">
+        <div class="h">A · Heldensilhouette</div>
+        <p>Nur der Vogel, groß und zentral als schwarze Silhouette vor dem leuchtenden Gap. Maximale Klarheit, ikonischer „Wächter-der-Zone"-Moment. Das grüne Wesen entfällt oder wird zum winzigen Detail.</p>
+        <span class="badge">V1 · Keeping the Focal Point · S.55–56</span><span class="badge">V1 · Chiaroscuro · S.19–20</span>
+      </div>
+    </div>
+    <div class="inspo">
+      <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#586870"/><stop offset="1" stop-color="#b88a4a"/></linearGradient></defs>
+        <rect width="320" height="180" fill="url(#g2)" opacity=".55"/>
+        <rect y="60" width="320" height="14" fill="#3a4548"/>
+        <rect y="110" width="320" height="70" fill="#0e1517"/>
+        <!-- zwei Figuren einander zugewandt, Spannungsdreieck -->
+        <ellipse cx="95" cy="105" rx="26" ry="38" fill="#7d4630"/>
+        <ellipse cx="215" cy="112" rx="24" ry="32" fill="#26442a"/>
+        <path d="M118,90 L195,100" stroke="#e6c98a" stroke-width="1.6" stroke-dasharray="6 4"/>
+        <ellipse cx="270" cy="95" rx="45" ry="20" fill="#e6c98a" opacity=".7"/>
+        <path d="M95,140 L60,180 M215,140 L250,180" stroke="#000" stroke-width="4" opacity=".4"/>
+      </svg>
+      <div class="it">
+        <div class="h">B · Die Begegnung</div>
+        <p>Beide Wesen einander zugewandt, leicht versetzt auf den Drittellinien — ihre Blicklinien bilden ein Spannungsdreieck mit dem Gap. Erzählt eine stille Konfrontation; das Unheimliche entsteht aus der Beziehung.</p>
+        <span class="badge">V2 · Lines of Tension · S.20–21</span><span class="badge">V2 · Composing by Thirds · K7 / S.73–81</span>
+      </div>
+    </div>
+    <div class="inspo">
+      <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="g3" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#0e1517"/><stop offset="1" stop-color="#caa15c"/></linearGradient></defs>
+        <rect width="320" height="180" fill="url(#g3)" opacity=".6"/>
+        <!-- extreme Untersicht: Brücke oben als Rahmen, Wesen ragen in Himmel -->
+        <rect width="320" height="34" fill="#222d30"/>
+        <rect y="34" width="320" height="10" fill="#3a4548"/>
+        <path d="M110,44 C80,70 95,180 150,180 L150,44Z" fill="#160c06"/>
+        <ellipse cx="120" cy="60" rx="34" ry="22" fill="#160c06"/>
+        <text x="180" y="120" fill="#e6c98a" font-family="Oswald" font-size="12" opacity=".8">Himmel/Gap</text>
+        <ellipse cx="225" cy="95" rx="55" ry="24" fill="#e6c98a" opacity=".6"/>
+      </svg>
+      <div class="it">
+        <div class="h">C · Overpowering Upshot</div>
+        <p>Kamera fast am Boden, Brücke wird zum schweren oberen Rahmen, der Vogel überragt sie und durchbricht die Linie. Volle Bedrohung/Größe — die latente Unheimlichkeit wird zur klaren Dominanz.</p>
+        <span class="badge">V1 · Overpowering Upshots · S.41–42</span><span class="badge">V2 · Against the Grain · K6 / S.65–71</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MASSNAHMENPLAN ===== -->
+<section class="block" id="plan">
+  <div class="sec-h"><span class="sn">☑</span><h2>Priorisierter Maßnahmenplan · To-do für Version 2</h2></div>
+  <p class="sec-sub">Anklickbar zum Abhaken. Sortiert nach Schweregrad — jeder Schritt nennt das Prinzip (Band/Seite) und hält deine Identität fest.</p>
+  <div class="plan" id="plansteps">
+    <div class="step c" onclick="this.classList.toggle('done')"><div class="box">✓</div><div class="txt">
+      <div class="h">1 · Fokus vor den Gap ziehen <span class="sev c">Kritisch</span></div>
+      <p>Hauptfigur (Vogel) so platzieren, dass sie als dunkle Silhouette vor dem hellsten Wert (Sonnen-Gap) steht. Der maximale Kontrast trägt dann den Fokus statt ins Leere zu zeigen.</p>
+      <span class="badge">V1 · Licht-als-Fokus · S.26–27</span><span class="badge">V1 · Focal Point · S.55–56</span>
+      <div class="iden">→ Bleibt giftig-golden &amp; kalt; Silhouette statt warmem Licht.</div>
+    </div></div>
+
+    <div class="step c" onclick="this.classList.toggle('done')"><div class="box">✓</div><div class="txt">
+      <div class="h">2 · Grüne Figur separieren <span class="sev c">Kritisch</span></div>
+      <p>Rim-Light auf der Gegenlichtseite und/oder helleren HG-Streifen hinter die rechte Kontur ziehen, damit die Silhouette nicht im Brückenschatten verschwindet.</p>
+      <span class="badge">V1 · Silhouette · K5 / S.96–105</span><span class="badge">V2 · Silhouetting · S.28–29</span>
+      <div class="iden">→ Fahles, kaltes Rim-Light passt zur Dämmerung.</div>
+    </div></div>
+
+    <div class="step c" onclick="this.classList.toggle('done')"><div class="box">✓</div><div class="txt">
+      <div class="h">3 · Tote untere Hälfte beheben <span class="sev c">Kritisch</span></div>
+      <p>Auf ~2.0–2.35:1 beschneiden <em>oder</em> den Boden aktivieren (lange Schatten zur Kamera, Pfütze/Risse). Keine strukturlose Fläche über 45 % stehen lassen.</p>
+      <span class="badge">V1 · Negative Space · S.42–44</span><span class="badge">V2 · Aspect-Ratio · K5 / S.55–64</span>
+      <div class="iden">→ Lange Schatten = aktive Isolation, ganz in deiner Stimmung.</div>
+    </div></div>
+
+    <div class="step w" onclick="this.classList.toggle('done')"><div class="box">✓</div><div class="txt">
+      <div class="h">4 · Blick zurückführen (Z/2-Flow) <span class="sev w">Wichtig</span></div>
+      <p>Rechtes Rückführungselement (Brückenpfeiler/Schild) oder Figurenhaltung, die den Blick wieder in die Szene holt. Komposition als flache Z- oder 2-Form denken.</p>
+      <span class="badge">V2 · Composition Flow · K3 / S.34–42</span>
+      <div class="iden">→ Pfeiler verstärkt die Einklemmung in der Zone.</div>
+    </div></div>
+
+    <div class="step w" onclick="this.classList.toggle('done')"><div class="box">✓</div><div class="txt">
+      <div class="h">5 · Frame-Energie über Asymmetrie <span class="sev w">Wichtig</span></div>
+      <p>Hauptfigur größer &amp; kantennah, Gegenpol klein &amp; tief. Die gestauchte „Luft" an einer Kante erzeugt Drama; Schlüsselpunkte auf die Drittellinien.</p>
+      <span class="badge">V2 · Compression &amp; Release · S.13–14</span><span class="badge">V2 · Thirds · K7 / S.73–81</span>
+      <div class="iden">→ Größenunterschied steigert das Unbehagen, Farbe unverändert.</div>
+    </div></div>
+
+    <div class="step h" onclick="this.classList.toggle('done')"><div class="box">✓</div><div class="txt">
+      <div class="h">6 · Stärken bewusst schärfen <span class="sev h">Halten</span></div>
+      <p>Untersicht, atmosphärische VG/MG/HG-Tiefe und runde Form-Sprache beibehalten und leicht zuspitzen (Wesen brechen die Brückenlinie).</p>
+      <span class="badge">V1 · Upshots · S.41–42</span><span class="badge">V2 · Sense of Depth · S.19</span>
+      <div class="iden">→ Das ist bereits deine Tonart — nur verstärken.</div>
+    </div></div>
+  </div>
+  <div class="plan-progress" id="progress">0 / 6 erledigt</div>
+</section>
+
+<!-- ===== QUELLEN ===== -->
+<section class="block" id="quellen">
+  <div class="sec-h"><span class="sn">§</span><h2>Quellen-Apparat</h2></div>
+  <p class="sec-sub">Alle referenzierten Stellen aus <i>Framed Ink</i> Vol. 1 &amp; Vol. 2 (Marcos Mateu-Mestre). Gedruckte Buchseiten.</p>
+  <div class="src-list">
+    <div><b>V1 · Kap. 1</b> · Think/Feel · „not telling, but making them feel" · S.14–15</div>
+    <div><b>V1 · Kap. 2</b> · Lighting · Chiaroscuro · S.19–20</div>
+    <div><b>V1 · Kap. 2</b> · Notan / Wertstudien · S.23–24</div>
+    <div><b>V1 · Kap. 2</b> · Basic Checklist / Licht-als-Fokus · S.26–27</div>
+    <div><b>V1 · Kap. 2</b> · Lenses / Screen Direction · S.28–31</div>
+    <div><b>V1 · Kap. 3</b> · Looking down, feeling down · S.40–41</div>
+    <div><b>V1 · Kap. 3</b> · Overpowering Upshots · S.41–42</div>
+    <div><b>V1 · Kap. 3</b> · Using the Negative Space · S.42–44</div>
+    <div><b>V1 · Kap. 3</b> · Angular vs. Curved · S.47–48</div>
+    <div><b>V1 · Kap. 3</b> · Keeping the Focal Point · S.55–56</div>
+    <div><b>V1 · Kap. 4</b> · Ramping up / Climax · S.76–79</div>
+    <div><b>V1 · Kap. 5</b> · Overall Silhouette (Head/Body) · S.96–105</div>
+    <div><b>V1 · Kap. 5</b> · Dynamics of Expression · S.102–105</div>
+    <div><b>V2 · Kap. 1</b> · Game Field / „the energy within" · S.13–14</div>
+    <div><b>V2 · Kap. 1</b> · Release vs. Pressure Zone · S.18</div>
+    <div><b>V2 · Kap. 1</b> · Establishing a Sense of Depth · S.19</div>
+    <div><b>V2 · Kap. 1</b> · Lines of Tension · S.20–21</div>
+    <div><b>V2 · Kap. 2</b> · Silhouetting, An Introduction · S.28–29</div>
+    <div><b>V2 · Kap. 3</b> · Composition Flow / „natural flow" · S.34–42</div>
+    <div><b>V2 · Kap. 5</b> · Aspect-Ratio-Mechanik · S.55–64</div>
+    <div><b>V2 · Kap. 6</b> · Against the Grain · S.65–71</div>
+    <div><b>V2 · Kap. 7</b> · Splitting the Screen (Thirds/Halves/Fourths) · S.72–89</div>
+    <div><b>V2 · Kap. 10</b> · Process &amp; Gallery Analysis · S.113–125</div>
+  </div>
+  <p class="copyright-note">Direktzitate sind kurz (&lt; 15 Wörter), in Anführungszeichen und mit Quelle gesetzt; höchstens eines pro Quelle. Alle übrigen Prinzipien sind paraphrasiert. Notan- und Before/After-Skizzen sind eigenständig erzeugt und bilden keine Buchzeichnungen nach. Buchinhalt dient als Referenz, nicht als Layout-Vorbild.</p>
+</section>
+
+<footer>
+  <div class="big">„Erzählung vor Dekoration. Identität über Konformität. Ein Werkzeugkasten, kein Stilzwang."</div>
+  Framed-Ink-Analyse · 5 Durchläufe · erzeugt 06.06.2026 · analytische Linse nach Marcos Mateu-Mestre
+</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  // Layer-Definitionen je Durchlauf
+  var runLayers = {
+    "1":["anno","grid"],
+    "2":["eye","tension"],
+    "3":["game","grid"],
+    "4":["sil"],
+    "5":["eye","anno"]
+  };
+  var allLayers = ["anno","eye","tension","game","grid","sil"];
+  function setLayer(name,on){
+    var el=document.getElementById("L-"+name);
+    if(el) el.style.display = on ? "block":"none";
+    var btn=document.querySelector('.tg[data-layer="'+name+'"]');
+    if(btn) btn.classList.toggle("active",on);
+  }
+  // Layer-Buttons (frei toggeln)
+  document.querySelectorAll('.tg[data-layer]').forEach(function(b){
+    b.addEventListener("click",function(){
+      var n=b.getAttribute("data-layer");
+      var el=document.getElementById("L-"+n);
+      var on = el.style.display!=="block";
+      setLayer(n,on);
+    });
+  });
+  // Run-Buttons
+  document.querySelectorAll('.tg.run').forEach(function(b){
+    b.addEventListener("click",function(){
+      document.querySelectorAll('.tg.run').forEach(function(x){x.classList.remove("active")});
+      b.classList.add("active");
+      var r=b.getAttribute("data-run");
+      // alle aus
+      allLayers.forEach(function(n){setLayer(n,false)});
+      if(r!=="0" && runLayers[r]){ runLayers[r].forEach(function(n){setLayer(n,true)}); }
+    });
+  });
+  // Default: D1 aktiv
+  var d1=document.querySelector('.tg.run[data-run="1"]');
+  if(d1) d1.click();
+
+  // Plan-Fortschritt
+  var steps=document.querySelectorAll('#plansteps .step');
+  var prog=document.getElementById('progress');
+  function upd(){
+    var done=document.querySelectorAll('#plansteps .step.done').length;
+    prog.textContent = done+" / "+steps.length+" erledigt";
+  }
+  steps.forEach(function(s){s.addEventListener('click',upd)});
+
+  // Sticky-Nav active-state on scroll
+  var secs=Array.prototype.slice.call(document.querySelectorAll('section[id], header[id]'));
+  var links=document.querySelectorAll('nav.side a.nl');
+  function onScroll(){
+    var y=window.scrollY+120, cur=null;
+    secs.forEach(function(s){ if(s.offsetTop<=y) cur=s.id; });
+    links.forEach(function(l){
+      l.style.color = (l.getAttribute('href')==='#'+cur)? 'var(--ink)' : '';
+    });
+  }
+  window.addEventListener('scroll',onScroll); onScroll();
+})();
+</script>
+</body>
+</html>
+
